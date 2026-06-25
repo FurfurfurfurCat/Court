@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Court Availability</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --acc:#2563eb; --txt:#e2e8f0; --mut:#94a3b8; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:var(--bg); color:var(--txt); padding:16px; }
+  h1 { font-size:20px; margin:0 0 12px; }
+  .card { background:var(--card); border-radius:12px; padding:14px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:var(--mut); margin:10px 0 4px; }
+  select, input, button { width:100%; padding:12px; font-size:16px; border-radius:10px;
+         border:1px solid #334155; background:#0b1220; color:var(--txt); }
+  .venues { display:flex; flex-wrap:wrap; gap:8px; }
+  .venues label { display:flex; align-items:center; gap:8px; margin:0;
+         background:#0b1220; border:1px solid #334155; border-radius:10px; padding:10px 12px; color:var(--txt); font-size:15px; }
+  .venues input { width:auto; }
+  .row { display:flex; gap:10px; }
+  .row > div { flex:1; }
+  button { background:var(--acc); border:none; font-weight:600; margin-top:14px; }
+  button:active { opacity:.8; }
+  .court { border-top:1px solid #334155; padding:10px 0; }
+  .court b { color:#60a5fa; }
+  .times { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .t { background:#0b1220; border:1px solid #334155; border-radius:8px; padding:6px 9px; font-size:14px; }
+  .head { font-size:16px; font-weight:700; margin:4px 0; }
+  .mut { color:var(--mut); font-size:13px; }
+  .err { color:#f87171; }
+</style>
+</head>
+<body>
+<h1>🎾 Court availability</h1>
+
+<div class="card">
+  <label>Venues</label>
+  <div class="venues" id="venues"></div>
+
+  <div class="row">
+    <div><label>Date</label><input type="date" id="date"></div>
+    <div><label>Slot size</label>
+      <select id="slot">
+        <option value="30">30 min</option>
+        <option value="60">1 hour</option>
+        <option value="90">1.5 hour</option>
+        <option value="120">2 hour</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div><label>From (optional)</label><input type="time" id="after"></div>
+    <div><label>To (optional)</label><input type="time" id="before"></div>
+  </div>
+
+  <label>CORS proxy (switch if one stops working)</label>
+  <select id="proxy">
+    <option value="https://api.allorigins.win/raw?url=">allorigins</option>
+    <option value="https://corsproxy.io/?url=">corsproxy.io</option>
+    <option value="">none (direct — only works if not blocked)</option>
+  </select>
+
+  <button id="go">Check</button>
+</div>
+
+<div id="out"></div>
+
+<script>
+const VENUES = { "marsfield":"etdta-abuklea-rd-marsfield", "gpa":"mowbray-public-school" };
+const KRG    = { "allan-small-park":30, "soldiers-memorial":8, "roseville-park":44 };
+const ALL = [...Object.keys(VENUES), ...Object.keys(KRG)];
+
+// build venue checkboxes
+const vbox = document.getElementById("venues");
+ALL.forEach(v => {
+  const l = document.createElement("label");
+  l.innerHTML = `<input type="checkbox" value="${v}" ${v==="gpa"?"checked":""}> ${v}`;
+  vbox.appendChild(l);
+});
+// default date = today
+document.getElementById("date").value = new Date().toISOString().slice(0,10);
+
+function prox(u){ const p = document.getElementById("proxy").value; return p ? p + encodeURIComponent(u) : u; }
+async function getText(u){ const r = await fetch(prox(u)); if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }
+async function getJSON(u){ return JSON.parse(await getText(u)); }
+
+function hm(s){ return (+s.slice(0,2))*60 + (+s.slice(3,5)); }
+function fmt(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
+
+function aggregate(times, slot){
+  const n = slot/30; if(n<=1) return times;
+  const mins = new Set(times.map(hm));
+  return times.filter(t => { const b = hm(t); for(let k=0;k<n;k++) if(!mins.has(b+30*k)) return false; return true; });
+}
+
+async function sportlogic(key, ymd, slot){
+  const cid = VENUES[key];
+  const url = `https://www.tennisvenues.com.au/booking/${cid}/fetch-booking-data?client_id=${cid}&venue_id=1&resource_id=&date=${ymd}&view=v4`;
+  const html = await getText(url);
+  const courts = {}; let m;
+  const reH = /data-court-index='(\d+)'>([^<]*)<\/th>/g;
+  while((m = reH.exec(html))) courts[m[1]] = m[2];
+  const sets = {};
+  const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='[^']*?&t=(\d+)/g;
+  while((m = reA.exec(html))){
+    const name = courts[m[1]] || m[1];
+    const t = m[2].padStart(4,"0");
+    (sets[name] = sets[name] || new Set()).add(t.slice(0,2)+":"+t.slice(2));
+  }
+  const out = {};
+  for(const name in sets) out[name] = aggregate([...sets[name]].sort(), slot);
+  return out;
+}
+
+async function krg(key, ymd, slot){
+  const vid = KRG[key];
+  const iso = `${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}`;
+  const jd = new Date(iso+"T00:00:00").getDay();   // Sun=0..Sat=6
+  const dow = jd === 0 ? 7 : jd;                    // API: Mon=1..Sun=7
+  const oh = await getJSON(`https://krg.bookable.net.au/api/v2/venues/${vid}/getbaseopeninghourslist`);
+  const courts = [];
+  for(const it of oh){
+    const b = it.BookableID || "";
+    if(!b.startsWith("SC-")) continue;
+    const det = (it.OpeningHour && it.OpeningHour.Details) || [];
+    for(const d of det){
+      if(d.DayOfWeek === dow && d.IsOpen && d.OpenTime){ courts.push([b, it.SectionName||b, d.OpenTime, d.CloseTime]); break; }
+    }
+  }
+  const ids = courts.map(c => c[0]);
+  const bk = await getJSON(`https://krg.bookable.net.au/api/v2/bookingbookablesinperiodandbookableids?bookableIdsStr=${ids.join(",")}&fromDate=${iso}T00:00:00&toDate=${iso}T23:59:59&hideCancelledBooking=true&selectedDatesStr=&hideClosure=true&hideWorkBooking=true`);
+  const booked = {};
+  for(const x of bk){
+    if(ids.includes(x.BookableID) && x.Start_Date && x.End_Date)
+      (booked[x.BookableID] = booked[x.BookableID] || []).push([x.Start_Date.slice(11,16), x.End_Date.slice(11,16)]);
+  }
+  const out = {};
+  for(const [b, name, o, c] of courts){
+    const free = []; let t = hm(o); const end = hm(c);
+    while(t + slot <= end){
+      const se = t + slot;
+      const clash = (booked[b]||[]).some(([s,e]) => hm(s) < se && t < hm(e));
+      if(!clash) free.push(fmt(t));
+      t = se;
+    }
+    out[name] = free;
+  }
+  return out;
+}
+
+async function checkVenue(v, ymd, slot){
+  return (v in VENUES) ? sportlogic(v, ymd, slot) : krg(v, ymd, slot);
+}
+
+document.getElementById("go").onclick = async () => {
+  const out = document.getElementById("out");
+  const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
+  const ymd = document.getElementById("date").value.replace(/-/g,"");
+  const slot = +document.getElementById("slot").value;
+  const after = document.getElementById("after").value;   // "" or "HH:MM"
+  const before = document.getElementById("before").value;
+  if(!venues.length){ out.innerHTML = '<div class="card err">Pick at least one venue.</div>'; return; }
+  out.innerHTML = '<div class="card mut">Checking…</div>';
+  const blocks = [];
+  for(const v of venues){
+    try {
+      let a = await checkVenue(v, ymd, slot);
+      if(after || before){
+        const f = {};
+        for(const c in a) f[c] = a[c].filter(t => (!after || t >= after) && (!before || t < before));
+        a = f;
+      }
+      const courts = Object.keys(a).sort().filter(c => a[c].length);
+      const win = (after||before) ? `  [${after||".."}-${before||".."}]` : "";
+      let h = `<div class="card"><div class="head">${v}${win}</div>`;
+      if(!courts.length) h += '<div class="mut">No open slots.</div>';
+      for(const c of courts)
+        h += `<div class="court"><b>${c}</b> (${a[c].length})<div class="times">${a[c].map(t=>`<span class="t">${t}</span>`).join("")}</div></div>`;
+      blocks.push(h + "</div>");
+    } catch(e){
+      blocks.push(`<div class="card err">${v}: ${e.message}. Try a different proxy above, or use mobile data.</div>`);
+    }
+  }
+  out.innerHTML = blocks.join("");
+};
+</script>
+</body>
+</html>
