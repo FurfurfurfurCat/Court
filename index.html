@@ -27,6 +27,7 @@
   .times { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .t { background:#0b1220; border:1px solid #334155; border-radius:8px; padding:6px 9px; font-size:14px; }
   .head { font-size:16px; font-weight:700; margin:4px 0; }
+  .book { color:#60a5fa; font-size:13px; text-decoration:none; display:inline-block; margin-bottom:4px; }
   .mut { color:var(--mut); font-size:13px; }
   .err { color:#f87171; }
 </style>
@@ -57,10 +58,11 @@
 
   <label>CORS proxy (switch if one stops working)</label>
   <select id="proxy">
-    <option value="https://api.allorigins.win/raw?url=">allorigins</option>
-    <option value="https://corsproxy.io/?url=">corsproxy.io</option>
+    <option value="https://corsproxy.io/?url=">corsproxy.io (supports POST — needed for BCS venues)</option>
+    <option value="https://api.allorigins.win/raw?url=">allorigins (GET only — SportLogic/KRG venues)</option>
     <option value="">none (direct — only works if not blocked)</option>
   </select>
+  <div class="mut">Pennant Hills, Epping, Beecroft &amp; Cowells Lane (BCS) need a POST-capable proxy (corsproxy.io).</div>
 
   <button id="go">Check</button>
 </div>
@@ -68,9 +70,24 @@
 <div id="out"></div>
 
 <script>
-const VENUES = { "marsfield":"etdta-abuklea-rd-marsfield", "gpa":"mowbray-public-school" };
-const KRG    = { "allan-small-park":30, "soldiers-memorial":8, "roseville-park":44 };
-const ALL = [...Object.keys(VENUES), ...Object.keys(KRG)];
+const VENUES = { "marsfield":"etdta-abuklea-rd-marsfield", "gpa":"mowbray-public-school", "ryde":"ryde-tennis-centre",
+                 "artarmon":"artarmon-tennis", "mq":"vince-barclay-coaching-academy" };
+const KRG    = { "allan-small":30, "tyron":8, "roseville":44 };
+// Tennis BCS (ASP.NET WebForms) venues:  key -> [base_url, complex_code or null=use default]
+const BCS    = {
+  "pennant-hills": ["https://etdta.tennisbcs.com.au", "PH"],   // 16 courts, paged (Courts 1-6/7-12/13-16)
+  "midson":        ["https://etdta.tennisbcs.com.au", "MR"],   // Epping (Midson Rd), 3 courts
+  "beecroft":      ["https://bltc.tennisbcs.com.au", null],
+  "cowells-lane":  ["https://etc.tennisbcs.com.au", null],
+};
+const BCS_PATH = "/applns/bookings/Bookdisp2.aspx";
+const ALL = [...Object.keys(VENUES), ...Object.keys(KRG), ...Object.keys(BCS)];
+
+function bookUrl(v){
+  if(v in VENUES) return `https://www.tennisvenues.com.au/booking/${VENUES[v]}`;
+  if(v in BCS)    return BCS[v][0] + BCS_PATH;
+  return `https://krg.bookable.net.au/venues/${KRG[v]}/`;
+}
 
 // build venue checkboxes
 const vbox = document.getElementById("venues");
@@ -85,6 +102,13 @@ document.getElementById("date").value = new Date().toISOString().slice(0,10);
 function prox(u){ const p = document.getElementById("proxy").value; return p ? p + encodeURIComponent(u) : u; }
 async function getText(u){ const r = await fetch(prox(u)); if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }
 async function getJSON(u){ return JSON.parse(await getText(u)); }
+async function postText(u, dataObj){
+  const body = new URLSearchParams(dataObj).toString();   // form-urlencoded (encodes + as %2B)
+  const r = await fetch(prox(u), { method:"POST",
+            headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body });
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  return r.text();
+}
 
 function hm(s){ return (+s.slice(0,2))*60 + (+s.slice(3,5)); }
 function fmt(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
@@ -150,8 +174,72 @@ async function krg(key, ymd, slot){
   return out;
 }
 
+// ---- Tennis BCS (ASP.NET WebForms): GET hidden fields -> POST calendar postback ----
+function bcsHidden(html){
+  const d = {}; let m;
+  const re = /<input[^>]*type="hidden"[^>]*name="([^"]*)"[^>]*value="([^"]*)"/g;
+  while((m = re.exec(html))) d[m[1]] = m[2];
+  return d;
+}
+function bcsTime(t){                       // "6:00 AM" -> "06:00"
+  const m = t.match(/(\d{1,2}):(\d{2})/); let h = +m[1]; const mm = m[2];
+  const ap = t.trim().slice(-2).toUpperCase();
+  if(ap === "PM" && h !== 12) h += 12;
+  if(ap === "AM" && h === 12) h = 0;
+  return String(h).padStart(2,"0") + ":" + mm;
+}
+function bcsParsePage(doc, into){           // merge free slots from one grid page into `into` {name:Set}
+  const hdr = doc.match(/>Times<[\s\S]*?<\/tr>/);
+  const names = []; let m;
+  if(hdr){ const reN = /colspan="2"[^>]*>([\s\S]*?)<\/th>/g;
+    while((m = reN.exec(hdr[0]))) names.push(m[1].replace(/<[^>]+>/g,"").trim()); }
+  // free slot = Bookmake link with CustID=Available; map by COLUMN position (Court<N>hyper)
+  const reA = /_Court(\d+)hyper"[^>]*?href="Bookmake\.aspx\?TimeID=([^&]*)&amp;[^"]*?CustID=Available"/g;
+  while((m = reA.exec(doc))){
+    const i = +m[1] - 1;
+    if(i >= 0 && i < names.length){
+      const nm = names[i];
+      (into[nm] = into[nm] || new Set()).add(bcsTime(m[2]));
+    }
+  }
+}
+async function bcs(key, ymd, slot){
+  const [base, complex] = BCS[key];
+  const url = base + BCS_PATH;
+  // ASP.NET Calendar day argument = days since 2000-01-01 (UTC, so DST can't shift it)
+  const arg = Math.round((Date.UTC(+ymd.slice(0,4), +ymd.slice(4,6)-1, +ymd.slice(6,8))
+                          - Date.UTC(2000,0,1)) / 86400000);
+  const html = await getText(url);
+  // Select the date. Resubmit EVERY hidden field (dropping __VIEWSTATEENCRYPTED etc.
+  // makes viewstate MAC validation fail). Set the centre dropdown to switch location.
+  let data = bcsHidden(html);
+  data["__EVENTTARGET"] = "ctl00$Contentmain$Calendar2";
+  data["__EVENTARGUMENT"] = String(arg);
+  if(complex) data["ctl00$Contentmain$ComplexList1"] = complex;
+  let doc = await postText(url, data);
+
+  const merged = {};
+  bcsParsePage(doc, merged);
+  // extra court-range pages ("Courts 7-12", ...); PageF1 already shown
+  const pages = [...doc.matchAll(/name="(ctl00\$Contentmain\$PageF\d+)"[^>]*value="([^"]*)"/g)]
+                  .filter(p => !p[1].endsWith("PageF1"));
+  for(const [, name, val] of pages){
+    let d2 = bcsHidden(doc);               // refreshed viewstate from current page
+    d2["__EVENTTARGET"] = ""; d2["__EVENTARGUMENT"] = "";
+    if(complex) d2["ctl00$Contentmain$ComplexList1"] = complex;
+    d2[name] = val;                        // "click" the page button
+    doc = await postText(url, d2);
+    bcsParsePage(doc, merged);
+  }
+  const out = {};
+  for(const nm in merged) out[nm] = aggregate([...merged[nm]].sort(), slot);
+  return out;
+}
+
 async function checkVenue(v, ymd, slot){
-  return (v in VENUES) ? sportlogic(v, ymd, slot) : krg(v, ymd, slot);
+  if(v in VENUES) return sportlogic(v, ymd, slot);
+  if(v in BCS)    return bcs(v, ymd, slot);
+  return krg(v, ymd, slot);
 }
 
 document.getElementById("go").onclick = async () => {
@@ -175,9 +263,10 @@ document.getElementById("go").onclick = async () => {
       const courts = Object.keys(a).sort().filter(c => a[c].length);
       const win = (after||before) ? `  [${after||".."}-${before||".."}]` : "";
       let h = `<div class="card"><div class="head">${v}${win}</div>`;
+      h += `<a class="book" href="${bookUrl(v)}" target="_blank" rel="noopener">book ↗</a>`;
       if(!courts.length) h += '<div class="mut">No open slots.</div>';
       for(const c of courts)
-        h += `<div class="court"><b>${c}</b> (${a[c].length})<div class="times">${a[c].map(t=>`<span class="t">${t}</span>`).join("")}</div></div>`;
+        h += `<div class="court"><a class="book" href="${bookUrl(v)}" target="_blank" rel="noopener"><b>${c}</b> ↗</a> (${a[c].length})<div class="times">${a[c].map(t=>`<span class="t">${t}</span>`).join("")}</div></div>`;
       blocks.push(h + "</div>");
     } catch(e){
       blocks.push(`<div class="card err">${v}: ${e.message}. Try a different proxy above, or use mobile data.</div>`);
