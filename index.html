@@ -7,15 +7,15 @@
 
 <style>
 :root {
-  --bg:#fff1f5;
-  --bg2:#ffe4ec;
+  --bg:#fffdfd;
+  --bg2:#fff6fa;
   --card:#ffffff;
-  --card-soft:#fff7fa;
+  --card-soft:#fff8fb;
   --acc:#ec4899;
   --acc2:#db2777;
   --txt:#3f1d2f;
   --mut:#8a5a72;
-  --line:#f9a8d4;
+  --line:#f5d6e6;
   --line-soft:#fbcfe8;
   --danger:#dc2626;
   --success:#15803d;
@@ -51,11 +51,11 @@ h1 {
 
 .card {
   background:rgba(255,255,255,.92);
-  border:1px solid rgba(249,168,212,.72);
-  box-shadow:0 16px 36px rgba(236,72,153,.14);
+  border:1px solid rgba(251,207,232,.85);
+  box-shadow:0 16px 36px rgba(236,72,153,.08);
   backdrop-filter:blur(12px);
-  border-radius:22px;
-  padding:16px;
+  border-radius:24px;
+  padding:18px;
   margin-bottom:16px;
 }
 
@@ -80,11 +80,11 @@ select, input, button {
 input:focus, select:focus {
   outline:none;
   border-color:var(--acc);
-  box-shadow:0 0 0 3px rgba(236,72,153,.14);
+  box-shadow:0 0 0 3px rgba(236,72,153,.08);
 }
 
 button {
-  background:linear-gradient(135deg, var(--acc), var(--acc2));
+  background:var(--acc);
   border:none;
   color:#fff;
   font-weight:900;
@@ -102,8 +102,9 @@ button.secondary {
   border:1px solid var(--line);
   color:var(--acc2);
   margin-top:0;
-  font-size:14px;
-  padding:10px 12px;
+  font-size:13px;
+  padding:8px 12px;
+  border-radius:999px;
 }
 
 .row {
@@ -113,11 +114,23 @@ button.secondary {
 
 .row > div { flex:1; }
 
+.venue-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
 .actions {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin:10px 0 4px;
+  display:flex;
+  gap:8px;
+  margin:0;
+}
+
+.actions button.secondary {
+  width:auto;
+  min-width:88px;
 }
 
 .venues {
@@ -134,7 +147,7 @@ button.secondary {
   background:#fffafd;
   border:1px solid var(--line);
   border-radius:999px;
-  padding:9px 12px;
+  padding:8px 13px;
   color:var(--txt);
   font-size:14px;
   cursor:pointer;
@@ -231,11 +244,116 @@ button.secondary {
   margin-top:4px;
 }
 
+
+.form-grid {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px;
+  align-items:end;
+  margin-top:14px;
+}
+
+.field {
+  min-width:0;
+}
+
+.venues {
+  margin-bottom:14px;
+}
+
+select {
+  appearance:auto;
+}
+
+
+/* Alignment fix: make Date and Slot Size the same visual height */
+.form-grid .field {
+  display:flex;
+  flex-direction:column;
+}
+
+.form-grid input,
+.form-grid select {
+  height:54px;
+  min-height:54px;
+  line-height:1.2;
+  padding:0 14px;
+}
+
+.form-grid label,
+.form-grid label.field-label {
+  min-height:18px;
+  line-height:18px;
+}
+
+
+/* Final polish: round everything and add spacing before venue chips */
+.card {
+  border-radius:32px;
+}
+
+button,
+button.secondary,
+input,
+select,
+.venues label,
+.t {
+  border-radius:999px;
+}
+
+.form-grid input,
+.form-grid select {
+  border-radius:22px;
+}
+
+.primary-button,
+#go {
+  border-radius:999px;
+}
+
+.venue-top {
+  margin-bottom:18px;
+}
+
+.actions {
+  margin-bottom:6px;
+}
+
+.venues {
+  margin-top:16px;
+  gap:12px;
+}
+
+.venues label {
+  padding:10px 18px;
+  min-height:44px;
+}
+
+button.secondary {
+  padding:10px 18px;
+  min-height:42px;
+}
+
+.form-grid {
+  border-top:1px solid #f7d9e8;
+  padding-top:22px;
+  margin-top:22px;
+}
+
+@media (max-width:640px) {
+  .form-grid {
+    grid-template-columns:1fr;
+    gap:0;
+  }
+}
+
 @media (max-width:640px) {
   body { padding:14px; }
   h1 { font-size:24px; }
   .row { flex-direction:column; gap:0; }
-  .actions { grid-template-columns:1fr; }
+  .venue-top { align-items:flex-start; flex-direction:column; }
+  .actions { width:100%; }
+  .actions button.secondary { flex:1; }
   button { position:sticky; bottom:12px; z-index:5; }
   button.secondary { position:static; }
 }
@@ -255,13 +373,13 @@ button.secondary {
 
   <div class="venues" id="venues"></div>
 
-  <div class="row">
-    <div>
+  <div class="form-grid">
+    <div class="field">
       <label>Date</label>
       <input type="date" id="date">
     </div>
 
-    <div>
+    <div class="field">
       <label>Slot Size</label>
       <select id="slot">
         <option value="30">30 Minutes</option>
@@ -270,17 +388,87 @@ button.secondary {
         <option value="120">2 Hours</option>
       </select>
     </div>
-  </div>
 
-  <div class="row">
-    <div>
+    <div class="field">
       <label>From Optional</label>
-      <input type="time" id="after">
+      <select id="after">
+        <option value="">Any Time</option>
+        <option value="06:00">6:00 AM</option>
+        <option value="06:30">6:30 AM</option>
+        <option value="07:00">7:00 AM</option>
+        <option value="07:30">7:30 AM</option>
+        <option value="08:00">8:00 AM</option>
+        <option value="08:30">8:30 AM</option>
+        <option value="09:00">9:00 AM</option>
+        <option value="09:30">9:30 AM</option>
+        <option value="10:00">10:00 AM</option>
+        <option value="10:30">10:30 AM</option>
+        <option value="11:00">11:00 AM</option>
+        <option value="11:30">11:30 AM</option>
+        <option value="12:00">12:00 PM</option>
+        <option value="12:30">12:30 PM</option>
+        <option value="13:00">1:00 PM</option>
+        <option value="13:30">1:30 PM</option>
+        <option value="14:00">2:00 PM</option>
+        <option value="14:30">2:30 PM</option>
+        <option value="15:00">3:00 PM</option>
+        <option value="15:30">3:30 PM</option>
+        <option value="16:00">4:00 PM</option>
+        <option value="16:30">4:30 PM</option>
+        <option value="17:00">5:00 PM</option>
+        <option value="17:30">5:30 PM</option>
+        <option value="18:00">6:00 PM</option>
+        <option value="18:30">6:30 PM</option>
+        <option value="19:00">7:00 PM</option>
+        <option value="19:30">7:30 PM</option>
+        <option value="20:00">8:00 PM</option>
+        <option value="20:30">8:30 PM</option>
+        <option value="21:00">9:00 PM</option>
+        <option value="21:30">9:30 PM</option>
+        <option value="22:00">10:00 PM</option>
+        <option value="22:30">10:30 PM</option>
+      </select>
     </div>
 
-    <div>
+    <div class="field">
       <label>To Optional</label>
-      <input type="time" id="before">
+      <select id="before">
+        <option value="">Any Time</option>
+        <option value="06:00">6:00 AM</option>
+        <option value="06:30">6:30 AM</option>
+        <option value="07:00">7:00 AM</option>
+        <option value="07:30">7:30 AM</option>
+        <option value="08:00">8:00 AM</option>
+        <option value="08:30">8:30 AM</option>
+        <option value="09:00">9:00 AM</option>
+        <option value="09:30">9:30 AM</option>
+        <option value="10:00">10:00 AM</option>
+        <option value="10:30">10:30 AM</option>
+        <option value="11:00">11:00 AM</option>
+        <option value="11:30">11:30 AM</option>
+        <option value="12:00">12:00 PM</option>
+        <option value="12:30">12:30 PM</option>
+        <option value="13:00">1:00 PM</option>
+        <option value="13:30">1:30 PM</option>
+        <option value="14:00">2:00 PM</option>
+        <option value="14:30">2:30 PM</option>
+        <option value="15:00">3:00 PM</option>
+        <option value="15:30">3:30 PM</option>
+        <option value="16:00">4:00 PM</option>
+        <option value="16:30">4:30 PM</option>
+        <option value="17:00">5:00 PM</option>
+        <option value="17:30">5:30 PM</option>
+        <option value="18:00">6:00 PM</option>
+        <option value="18:30">6:30 PM</option>
+        <option value="19:00">7:00 PM</option>
+        <option value="19:30">7:30 PM</option>
+        <option value="20:00">8:00 PM</option>
+        <option value="20:30">8:30 PM</option>
+        <option value="21:00">9:00 PM</option>
+        <option value="21:30">9:30 PM</option>
+        <option value="22:00">10:00 PM</option>
+        <option value="22:30">10:30 PM</option>
+      </select>
     </div>
   </div>
 
@@ -290,7 +478,9 @@ button.secondary {
 <div id="out"></div>
 
 <script>
-const CORS_PROXY = "https://corsproxy.io/?url=";
+// Replace this with your real Cloudflare Worker URL after deployment.
+// Example: const PROXY = "https://tennis-proxy.your-name.workers.dev/?url=";
+const PROXY = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/?url=";
 
 const VENUES = {
   "Marsfield":"etdta-abuklea-rd-marsfield",
@@ -342,7 +532,7 @@ function bookUrl(v) {
 }
 
 function prox(u) {
-  return CORS_PROXY + encodeURIComponent(u);
+  return PROXY + encodeURIComponent(u);
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
@@ -744,7 +934,7 @@ document.getElementById("go").onclick = async () => {
     }
 
     for (const item of fail) {
-      blocks.push(`<div class="card err">${esc(item.v)}: Load failed. Please try again later.</div>`);
+      blocks.push(`<div class="card err">${esc(item.v)}: Load failed. ${esc(item.error)}.</div>`);
     }
 
     out.innerHTML = blocks.join("") || '<div class="card mut">No results found.</div>';
