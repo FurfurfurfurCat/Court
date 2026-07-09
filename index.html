@@ -718,8 +718,8 @@ async function sportlogic(key, ymd, slot) {
 async function krg(key, ymd, slot) {
   const vid = KRG[key];
   const iso = `${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}`;
-  const jd = new Date(iso + "T00:00:00").getDay();
-  const dow = jd === 0 ? 7 : jd;
+  // The KRG API numbers days 0=Sunday..6=Saturday, same as JS getDay().
+  const dow = new Date(iso + "T00:00:00").getDay();
 
   const oh = await getJSON(`https://krg.bookable.net.au/api/v2/venues/${vid}/getbaseopeninghourslist`);
   const courts = [];
@@ -765,7 +765,10 @@ async function krg(key, ymd, slot) {
 
     for (const [o, c] of windows) {
       let t = hm(o);
-      const end = hm(c);
+      let end = hm(c);
+      // A close time at/before the open time means it closes past midnight
+      // (e.g. "00:00:00" = midnight). Treat it as end-of-day so slots aren't lost.
+      if (end <= t) end += 1440;
 
       while (t + slot <= end) {
         const se = t + slot;
