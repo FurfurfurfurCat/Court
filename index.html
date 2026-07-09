@@ -7,14 +7,18 @@
 
 <style>
 :root {
-  --bg:#020617;
-  --card:#0f172a;
-  --acc:#3b82f6;
-  --acc2:#60a5fa;
-  --txt:#e5e7eb;
-  --mut:#94a3b8;
-  --line:#334155;
-  --danger:#f87171;
+  --bg:#fff1f5;
+  --bg2:#ffe4ec;
+  --card:#ffffff;
+  --card-soft:#fff7fa;
+  --acc:#ec4899;
+  --acc2:#db2777;
+  --txt:#3f1d2f;
+  --mut:#8a5a72;
+  --line:#f9a8d4;
+  --line-soft:#fbcfe8;
+  --danger:#dc2626;
+  --success:#15803d;
 }
 
 * { box-sizing:border-box; }
@@ -23,26 +27,34 @@ body {
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   background:
-    radial-gradient(circle at top left, #1e3a8a66, transparent 35%),
-    linear-gradient(180deg, #020617, #0f172a);
+    radial-gradient(circle at top left, #fbcfe866, transparent 34%),
+    radial-gradient(circle at top right, #f9a8d466, transparent 28%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
   color:var(--txt);
   padding:18px;
-  max-width:920px;
+  max-width:960px;
   margin-inline:auto;
+  min-height:100vh;
 }
 
 h1 {
-  font-size:26px;
-  margin:6px 0 18px;
-  letter-spacing:-0.03em;
+  font-size:28px;
+  margin:8px 0 4px;
+  letter-spacing:-0.04em;
+}
+
+.subtitle {
+  color:var(--mut);
+  font-size:14px;
+  margin-bottom:18px;
 }
 
 .card {
-  background:rgba(15,23,42,.9);
-  border:1px solid rgba(148,163,184,.18);
-  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(249,168,212,.72);
+  box-shadow:0 16px 36px rgba(236,72,153,.14);
   backdrop-filter:blur(12px);
-  border-radius:18px;
+  border-radius:22px;
   padding:16px;
   margin-bottom:16px;
 }
@@ -51,30 +63,48 @@ label {
   display:block;
   font-size:13px;
   color:var(--mut);
-  margin:10px 0 5px;
-  font-weight:600;
+  margin:10px 0 6px;
+  font-weight:800;
 }
 
 select, input, button {
   width:100%;
   padding:12px;
   font-size:16px;
-  border-radius:12px;
+  border-radius:14px;
   border:1px solid var(--line);
-  background:#020617;
+  background:#fffafd;
   color:var(--txt);
 }
 
+input:focus, select:focus {
+  outline:none;
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px rgba(236,72,153,.14);
+}
+
 button {
-  background:linear-gradient(135deg, var(--acc), #1d4ed8);
+  background:linear-gradient(135deg, var(--acc), var(--acc2));
   border:none;
-  font-weight:800;
+  color:#fff;
+  font-weight:900;
   margin-top:16px;
   cursor:pointer;
 }
 
-button:hover { filter:brightness(1.08); }
-button:active { transform:scale(.99); }
+button:disabled {
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+button.secondary {
+  background:#fffafd;
+  border:1px solid var(--line);
+  color:var(--acc2);
+  margin-top:0;
+  font-size:14px;
+  padding:10px 12px;
+}
 
 .row {
   display:flex;
@@ -82,6 +112,13 @@ button:active { transform:scale(.99); }
 }
 
 .row > div { flex:1; }
+
+.actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:10px 0 4px;
+}
 
 .venues {
   display:flex;
@@ -94,19 +131,29 @@ button:active { transform:scale(.99); }
   align-items:center;
   gap:8px;
   margin:0;
-  background:#020617;
+  background:#fffafd;
   border:1px solid var(--line);
   border-radius:999px;
   padding:9px 12px;
   color:var(--txt);
   font-size:14px;
+  cursor:pointer;
 }
 
-.venues input { width:auto; }
+.venues label:has(input:checked) {
+  background:#fce7f3;
+  border-color:var(--acc);
+  color:#831843;
+}
+
+.venues input {
+  width:auto;
+  accent-color:var(--acc);
+}
 
 .head {
-  font-size:18px;
-  font-weight:800;
+  font-size:19px;
+  font-weight:900;
   margin:4px 0 6px;
 }
 
@@ -116,11 +163,12 @@ button:active { transform:scale(.99); }
   text-decoration:none;
   display:inline-block;
   margin-bottom:4px;
+  font-weight:800;
 }
 
 .court {
-  border-top:1px solid var(--line);
-  padding:11px 0;
+  border-top:1px solid var(--line-soft);
+  padding:12px 0;
 }
 
 .court b { color:var(--acc2); }
@@ -133,11 +181,12 @@ button:active { transform:scale(.99); }
 }
 
 .t {
-  background:#020617;
+  background:var(--card-soft);
   border:1px solid var(--line);
   border-radius:999px;
   padding:7px 11px;
   font-size:14px;
+  font-weight:650;
 }
 
 .mut {
@@ -145,21 +194,65 @@ button:active { transform:scale(.99); }
   font-size:13px;
 }
 
-.err { color:var(--danger); }
+.err {
+  color:var(--danger);
+  font-weight:700;
+}
+
+.ok {
+  color:var(--success);
+  font-weight:700;
+}
+
+.status {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.spinner {
+  width:16px;
+  height:16px;
+  border:2px solid #fbcfe8;
+  border-top-color:var(--acc);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform:rotate(360deg); }
+}
+
+.summary {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin-top:4px;
+}
 
 @media (max-width:640px) {
   body { padding:14px; }
-  h1 { font-size:23px; }
+  h1 { font-size:24px; }
   .row { flex-direction:column; gap:0; }
+  .actions { grid-template-columns:1fr; }
+  button { position:sticky; bottom:12px; z-index:5; }
+  button.secondary { position:static; }
 }
 </style>
 </head>
 
 <body>
 <h1>🎾 Court Availability</h1>
+<div class="subtitle">Check available tennis court slots across selected venues.</div>
 
 <div class="card">
   <label>Venues</label>
+  <div class="actions">
+    <button class="secondary" id="selectAll" type="button">Select All</button>
+    <button class="secondary" id="clearAll" type="button">Clear All</button>
+  </div>
+
   <div class="venues" id="venues"></div>
 
   <div class="row">
@@ -191,7 +284,7 @@ button:active { transform:scale(.99); }
     </div>
   </div>
 
-  <button id="go">Check Availability</button>
+  <button id="go" type="button">Check Availability</button>
 </div>
 
 <div id="out"></div>
@@ -252,8 +345,19 @@ function prox(u) {
   return CORS_PROXY + encodeURIComponent(u);
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function getText(u) {
-  const r = await fetch(prox(u));
+  const r = await fetchWithTimeout(prox(u));
   if (!r.ok) throw new Error("HTTP " + r.status);
   return r.text();
 }
@@ -264,7 +368,8 @@ async function getJSON(u) {
 
 async function postText(u, dataObj) {
   const body = new URLSearchParams(dataObj).toString();
-  const r = await fetch(prox(u), {
+
+  const r = await fetchWithTimeout(prox(u), {
     method:"POST",
     headers:{ "Content-Type":"application/x-www-form-urlencoded" },
     body
@@ -301,6 +406,18 @@ function withinWindow(t, slot, after, before) {
   const start = hm(t);
   const end = start + slot;
   return (!after || start >= hm(after)) && (!before || end <= hm(before));
+}
+
+function earliestTime(result) {
+  let best = Infinity;
+
+  for (const court in result) {
+    for (const t of result[court]) {
+      best = Math.min(best, hm(t));
+    }
+  }
+
+  return best;
 }
 
 async function sportlogic(key, ymd, slot) {
@@ -343,6 +460,7 @@ async function krg(key, ymd, slot) {
     if (!b.startsWith("SC-")) continue;
 
     const det = (it.OpeningHour && it.OpeningHour.Details) || [];
+
     for (const d of det) {
       if (d.DayOfWeek === dow && d.IsOpen && d.OpenTime) {
         courts.push([b, it.SectionName || b, d.OpenTime, d.CloseTime]);
@@ -352,6 +470,7 @@ async function krg(key, ymd, slot) {
   }
 
   const ids = courts.map(c => c[0]);
+  if (!ids.length) return {};
 
   const bk = await getJSON(
     `https://krg.bookable.net.au/api/v2/bookingbookablesinperiodandbookableids?bookableIdsStr=${ids.join(",")}&fromDate=${iso}T00:00:00&toDate=${iso}T23:59:59&hideCancelledBooking=true&selectedDatesStr=&hideClosure=true&hideWorkBooking=true`
@@ -405,12 +524,12 @@ function bcsHidden(html) {
 }
 
 function bcsTime(t) {
-  const m = t.match(/(\d{1,2}):(\d{2})/);
+  const m = String(t).match(/(\d{1,2}):(\d{2})/);
   if (!m) return "";
 
   let h = +m[1];
   const mm = m[2];
-  const ap = t.trim().slice(-2).toUpperCase();
+  const ap = String(t).trim().slice(-2).toUpperCase();
 
   if (ap === "PM" && h !== 12) h += 12;
   if (ap === "AM" && h === 12) h = 0;
@@ -424,20 +543,20 @@ function bcsParsePage(doc, into) {
   let m;
 
   if (hdr) {
-    const reN = /colspan="2"[^>]*>([\s\S]*?)<\/th>/g;
+    const reN = /colspan=['"]2['"][^>]*>([\s\S]*?)<\/th>/g;
     while ((m = reN.exec(hdr[0]))) {
       names.push(m[1].replace(/<[^>]+>/g, "").trim());
     }
   }
 
-  const reA = /_Court(\d+)hyper"[^>]*?href="Bookmake\.aspx\?TimeID=([^&]*)&amp;[^"]*?CustID=Available"/g;
+  const reA = /_Court(\d+)hyper["'][^>]*?href=["']Bookmake\.aspx\?TimeID=([^&"']+)&amp;[^"']*?CustID=Available/g;
 
   while ((m = reA.exec(doc))) {
     const i = +m[1] - 1;
 
     if (i >= 0 && i < names.length) {
       const nm = names[i];
-      const time = bcsTime(m[2]);
+      const time = bcsTime(decodeURIComponent(m[2]));
 
       if (time) {
         (into[nm] = into[nm] || new Set()).add(time);
@@ -470,10 +589,11 @@ async function bcs(key, ymd, slot) {
   const merged = {};
   bcsParsePage(doc, merged);
 
-  const pages = [...doc.matchAll(/name="(ctl00\$Contentmain\$PageF\d+)"[^>]*value="([^"]*)"/g)]
-    .filter(p => !p[1].endsWith("PageF1"));
+  const pageMatches = [
+    ...doc.matchAll(/name=["'](ctl00\$Contentmain\$PageF\d+)["'][^>]*value=["']([^"']*)["']/g)
+  ].filter(p => !p[1].endsWith("PageF1"));
 
-  for (const [, name, val] of pages) {
+  for (const [, name, val] of pageMatches) {
     let d2 = bcsHidden(doc);
     d2["__EVENTTARGET"] = "";
     d2["__EVENTARGUMENT"] = "";
@@ -497,6 +617,42 @@ async function checkVenue(v, ymd, slot) {
   return krg(v, ymd, slot);
 }
 
+function renderVenueResult(v, a, after, before) {
+  const courts = Object.keys(a).sort((x, y) => {
+    const ax = a[x][0] ? hm(a[x][0]) : Infinity;
+    const ay = a[y][0] ? hm(a[y][0]) : Infinity;
+    return ax - ay || x.localeCompare(y);
+  }).filter(c => a[c].length);
+
+  const totalSlots = courts.reduce((sum, c) => sum + a[c].length, 0);
+  const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
+
+  let h = `<div class="card">`;
+  h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${totalSlots ? "ok" : "mut"}">${totalSlots} Slot${totalSlots === 1 ? "" : "s"}</div></div>`;
+  h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`;
+
+  if (!courts.length) {
+    h += '<div class="mut">No open slots found.</div>';
+  }
+
+  for (const c of courts) {
+    h += `
+      <div class="court">
+        <a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">
+          <b>${esc(c)}</b> ↗
+        </a>
+        <span class="mut">(${a[c].length})</span>
+        <div class="times">
+          ${a[c].map(t => `<span class="t">${esc(t)}</span>`).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  h += "</div>";
+  return h;
+}
+
 const vbox = document.getElementById("venues");
 
 ALL.forEach(v => {
@@ -508,8 +664,17 @@ ALL.forEach(v => {
 
 document.getElementById("date").value = localDateISO();
 
+document.getElementById("selectAll").onclick = () => {
+  document.querySelectorAll(".venues input").forEach(c => c.checked = true);
+};
+
+document.getElementById("clearAll").onclick = () => {
+  document.querySelectorAll(".venues input").forEach(c => c.checked = false);
+};
+
 document.getElementById("go").onclick = async () => {
   const out = document.getElementById("out");
+  const button = document.getElementById("go");
 
   const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
   const ymd = document.getElementById("date").value.replace(/-/g, "");
@@ -522,56 +687,72 @@ document.getElementById("go").onclick = async () => {
     return;
   }
 
-  out.innerHTML = '<div class="card mut">Checking availability...</div>';
-
-  const blocks = [];
-
-  for (const v of venues) {
-    try {
-      let a = await checkVenue(v, ymd, slot);
-
-      if (after || before) {
-        const f = {};
-        for (const c in a) {
-          f[c] = a[c].filter(t => withinWindow(t, slot, after, before));
-        }
-        a = f;
-      }
-
-      const courts = Object.keys(a).sort().filter(c => a[c].length);
-      const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
-
-      let h = `<div class="card">`;
-      h += `<div class="head">${esc(v)}${esc(win)}</div>`;
-      h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`;
-
-      if (!courts.length) {
-        h += '<div class="mut">No open slots found.</div>';
-      }
-
-      for (const c of courts) {
-        h += `
-          <div class="court">
-            <a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">
-              <b>${esc(c)}</b> ↗
-            </a>
-            <span class="mut">(${a[c].length})</span>
-            <div class="times">
-              ${a[c].map(t => `<span class="t">${esc(t)}</span>`).join("")}
-            </div>
-          </div>
-        `;
-      }
-
-      h += "</div>";
-      blocks.push(h);
-
-    } catch (e) {
-      blocks.push(`<div class="card err">${esc(v)}: ${esc(e.message)}. Please try again later.</div>`);
-    }
+  if (after && before && hm(after) >= hm(before)) {
+    out.innerHTML = '<div class="card err">Please make sure the "From Optional" time is earlier than the "To Optional" time.</div>';
+    return;
   }
 
-  out.innerHTML = blocks.join("");
+  button.disabled = true;
+  button.textContent = "Checking...";
+
+  out.innerHTML = `
+    <div class="card status">
+      <div class="spinner"></div>
+      <div class="mut">Checking availability for ${venues.length} venue${venues.length === 1 ? "" : "s"}...</div>
+    </div>
+  `;
+
+  try {
+    const results = await Promise.allSettled(
+      venues.map(async v => {
+        let a = await checkVenue(v, ymd, slot);
+
+        if (after || before) {
+          const f = {};
+          for (const c in a) {
+            f[c] = a[c].filter(t => withinWindow(t, slot, after, before));
+          }
+          a = f;
+        }
+
+        return { v, a };
+      })
+    );
+
+    const ok = [];
+    const fail = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+
+      if (r.status === "fulfilled") {
+        ok.push(r.value);
+      } else {
+        fail.push({
+          v: venues[i],
+          error: r.reason && r.reason.message ? r.reason.message : "Load failed"
+        });
+      }
+    }
+
+    ok.sort((x, y) => earliestTime(x.a) - earliestTime(y.a) || x.v.localeCompare(y.v));
+
+    const blocks = [];
+
+    for (const item of ok) {
+      blocks.push(renderVenueResult(item.v, item.a, after, before));
+    }
+
+    for (const item of fail) {
+      blocks.push(`<div class="card err">${esc(item.v)}: Load failed. Please try again later.</div>`);
+    }
+
+    out.innerHTML = blocks.join("") || '<div class="card mut">No results found.</div>';
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Check Availability";
+  }
 };
 </script>
 </body>
