@@ -639,20 +639,20 @@ const ALL = [...Object.keys(VENUES), ...Object.keys(KRG), ...Object.keys(BCS)];
 // The Google Maps link is generated automatically from the address
 // (or the venue name if the address is left blank).
 const DETAILS = {
-  "Marsfield":     { address:"87 Abuklea Rd, Marsfield NSW 2122", phone:"0408401462", email:"info@tennisnation.com.au", map:"https://www.google.com/maps/place/Abuklea+Road+Tennis+Courts/@-33.786991,151.103969,17z" },
-  "GPA":           { address:"626/656 Mowbray Rd W, Lane Cove North NSW 2066", phone:"0412387276", email:"gian@gpatennis.com.au", map:"https://www.google.com/maps/place/GPA+Tennis/@-33.8044943,151.1564573,17z" },
-  "Ryde":          { address:"Weaver St, Ryde NSW 2112", phone:"0291337915", email:"ryde@voyagertennis.com", map:"https://www.google.com/maps/place/Voyager+Tennis+-+Ryde/@-33.8222532,151.1182915,17z" },
-  "Artarmon":      { address:"Corner of Hampden and, Barton Rd, Artarmon NSW 2064", phone:"0291337915", email:"artarmon@voyagertennis.com" },
-  "MQ":            { address:"158 Talavera Rd, Marsfield NSW 2122", phone:"0298770679", email:"vince@barclayacademy.com" },
-  "Midson":        { address:"97 Midson Rd, Epping NSW 2121", phone:"0296171723", email:"info@northwestsydneytennis.com.au" },
-  "Allan Small":   { address:"18A Saiala Rd, East Killara NSW 2071", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/place/Allan+Small+Park+Tennis+Courts/@-33.7536858,151.1818736,17z" },
-  "Tyron":         { address:"81 Tryon Rd, East Lindfield NSW 2070", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
-  "Roseville":     { address:"60B Clanville Rd, Roseville NSW 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
-  "Loyal Henry":   { address:"Loyal Henry Park Bromborough Road Roseville 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
-  "Elizabeth":     { address:"Queen Elizabeth Reserve Bradfield Road Killara 2071", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/place/Queen+Elizabeth+Reserve/@-33.7801283,151.1486944,17z" },
-  "Pennant Hills": { address:"Pennant Hills Park, 25X Britannia St, Pennant Hills NSW 2120", phone:"0294810970", email:"info@northwestsydneytennis.com.au" },
-  "Beecroft":      { address:"The Village Green, Beecroft Rd & The Crescent, Beecroft NSW 2119", phone:"0298761893", email:"info@beecroftlawntennis.org.au" },
-  "Cowells Lane":  { address:"22A Cowells Ln, Ermington NSW 2115", phone:"0298047111", email:"tennisbookings@ermingtonunited.com.au" }
+  "Marsfield":     { address:"87 Abuklea Rd, Marsfield NSW 2122", phone:"0408401462", email:"info@tennisnation.com.au", map:"https://www.google.com/maps/search/?api=1&query=Tennis+Nation+by+Rod+Fahey+Marsfield,+87+Abuklea+Rd,+Marsfield+NSW+2122" },
+  "GPA":           { address:"626/656 Mowbray Rd W, Lane Cove North NSW 2066", phone:"0412387276", email:"gian@gpatennis.com.au", map:"https://www.google.com/maps/search/?api=1&query=GPA+Tennis,+626/656+Mowbray+Rd+W,+Lane+Cove+North+NSW+2066" },
+  "Ryde":          { address:"Weaver St, Ryde NSW 2112", phone:"0291337915", email:"ryde@voyagertennis.com", map:"https://www.google.com/maps/search/?api=1&query=Voyager+Tennis+-+Ryde,+Weaver+St,+Ryde+NSW+2112" },
+  "Artarmon":      { address:"Corner of Hampden and, Barton Rd, Artarmon NSW 2064", phone:"0291337915", email:"artarmon@voyagertennis.com", map:"https://www.google.com/maps/search/?api=1&query=Voyager+Tennis+-+Artarmon,+Barton+Rd,+Artarmon+NSW+2064" },
+  "MQ":            { address:"158 Talavera Rd, Marsfield NSW 2122", phone:"0298770679", email:"vince@barclayacademy.com", map:"https://www.google.com/maps/search/?api=1&query=Vince+Barclay+Tennis,+158+Talavera+Rd,+Marsfield+NSW+2122" },
+  "Midson":        { address:"97 Midson Rd, Epping NSW 2121", phone:"0296171723", email:"info@northwestsydneytennis.com.au", map:"https://www.google.com/maps/search/?api=1&query=David+Scott+Reserve+Tennis+Courts,+97+Midson+Rd,+Epping+NSW+2121" },
+  "Allan Small":   { address:"18A Saiala Rd, East Killara NSW 2071", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/search/?api=1&query=Allan+Small+Park+Tennis+Courts,+18A+Saiala+Rd,+East+Killara+NSW+2071" },
+  "Tyron":         { address:"81 Tryon Rd, East Lindfield NSW 2070", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/search/?api=1&query=81+Tryon+Rd,+East+Lindfield+NSW+2070" },
+  "Roseville":     { address:"60B Clanville Rd, Roseville NSW 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/search/?api=1&query=Roseville+Park+Tennis+Club,+60B+Clanville+Rd,+Roseville+NSW+2069" },
+  "Loyal Henry":   { address:"49 Bromborough Rd, Roseville NSW 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/search/?api=1&query=Loyal+Henry+Park,+49+Bromborough+Rd,+Roseville+NSW+2069" },
+  "Elizabeth":     { address:"19-43 Bradfield Rd, Lindfield NSW 2070", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/search/?api=1&query=Queen+Elizabeth+Reserve,+19-43+Bradfield+Rd,+Lindfield+NSW+2070" },
+  "Pennant Hills": { address:"Pennant Hills Park, 25X Britannia St, Pennant Hills NSW 2120", phone:"0294810970", email:"info@northwestsydneytennis.com.au", map:"https://www.google.com/maps/search/?api=1&query=North+West+Sydney+Tennis,+25X+Britannia+St,+Pennant+Hills+NSW+2120" },
+  "Beecroft":      { address:"The Village Green, Beecroft Rd & The Crescent, Beecroft NSW 2119", phone:"0298761893", email:"info@beecroftlawntennis.org.au", map:"https://www.google.com/maps/search/?api=1&query=Beecroft+Lawn+Tennis+Club,+The+Village+Green,+Beecroft+Rd+%26+The+Crescent,+Beecroft+NSW+2119" },
+  "Cowells Lane":  { address:"22A Cowells Ln, Ermington NSW 2115", phone:"0298047111", email:"tennisbookings@ermingtonunited.com.au", map:"https://www.google.com/maps/search/?api=1&query=Cowells+Lane+Tennis+Courts,+22A+Cowells+Ln,+Ermington+NSW+2115" }
 };
 
 function mapUrl(v) {
