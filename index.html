@@ -483,15 +483,18 @@ button.secondary,
 }
 
 /* Falling sakura petals (decorative, non-interactive). */
-#sakura {
+#sakura,
+#sakura-front {
   position:fixed;
   inset:0;
   overflow:hidden;
   pointer-events:none;
-  z-index:-1;
 }
 
-#sakura .petal {
+#sakura { z-index:-1; }        /* behind the cards */
+#sakura-front { z-index:9999; } /* drifting over the content */
+
+.petal {
   position:absolute;
   top:-6vh;
   width:14px;
@@ -517,7 +520,8 @@ button.secondary,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #sakura { display:none; }
+  #sakura,
+  #sakura-front { display:none; }
 }
 
 </style>
@@ -1270,11 +1274,14 @@ document.getElementById("go").onclick = async () => {
   }
 };
 
-// Sakura petals drifting in the background.
+// Sakura petals drifting both behind and over the content.
 (function sakura() {
-  const layer = document.createElement("div");
-  layer.id = "sakura";
-  document.body.appendChild(layer);
+  const back = document.createElement("div");
+  back.id = "sakura";
+  const front = document.createElement("div");
+  front.id = "sakura-front";
+  document.body.appendChild(back);
+  document.body.appendChild(front);
 
   const tints = [
     "linear-gradient(135deg, #fde4f1, #f9a8d4)",
@@ -1282,7 +1289,7 @@ document.getElementById("go").onclick = async () => {
     "linear-gradient(135deg, #fce7f3, #f9a8d4)"
   ];
 
-  const COUNT = 24;
+  const COUNT = 30;
   for (let i = 0; i < COUNT; i++) {
     const p = document.createElement("div");
     p.className = "petal";
@@ -1294,7 +1301,8 @@ document.getElementById("go").onclick = async () => {
     p.style.animationDuration = (7 + Math.random() * 8) + "s";
     p.style.animationDelay = (-Math.random() * 15) + "s";
     if (Math.random() < 0.5) p.style.borderRadius = "0 100% 0 100%";
-    layer.appendChild(p);
+    // ~40% drift in front of the content, the rest behind.
+    (Math.random() < 0.4 ? front : back).appendChild(p);
   }
 })();
 </script>
