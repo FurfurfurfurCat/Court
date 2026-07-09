@@ -52,6 +52,7 @@ label {
   font-size:13px;
   color:var(--mut);
   margin:10px 0 5px;
+  font-weight:600;
 }
 
 select, input, button {
@@ -72,22 +73,15 @@ button {
   cursor:pointer;
 }
 
-button:hover {
-  filter:brightness(1.08);
-}
-
-button:active {
-  transform:scale(.99);
-}
+button:hover { filter:brightness(1.08); }
+button:active { transform:scale(.99); }
 
 .row {
   display:flex;
   gap:10px;
 }
 
-.row > div {
-  flex:1;
-}
+.row > div { flex:1; }
 
 .venues {
   display:flex;
@@ -108,9 +102,7 @@ button:active {
   font-size:14px;
 }
 
-.venues input {
-  width:auto;
-}
+.venues input { width:auto; }
 
 .head {
   font-size:18px;
@@ -131,9 +123,7 @@ button:active {
   padding:11px 0;
 }
 
-.court b {
-  color:var(--acc2);
-}
+.court b { color:var(--acc2); }
 
 .times {
   display:flex;
@@ -155,9 +145,7 @@ button:active {
   font-size:13px;
 }
 
-.err {
-  color:var(--danger);
-}
+.err { color:var(--danger); }
 
 @media (max-width:640px) {
   body { padding:14px; }
@@ -181,29 +169,29 @@ button:active {
     </div>
 
     <div>
-      <label>Slot size</label>
+      <label>Slot Size</label>
       <select id="slot">
-        <option value="30">30 min</option>
-        <option value="60" selected>1 hour</option>
-        <option value="90">1.5 hour</option>
-        <option value="120">2 hour</option>
+        <option value="30">30 Minutes</option>
+        <option value="60" selected>1 Hour</option>
+        <option value="90">1.5 Hours</option>
+        <option value="120">2 Hours</option>
       </select>
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>From optional</label>
+      <label>From Optional</label>
       <input type="time" id="after">
     </div>
 
     <div>
-      <label>To optional</label>
+      <label>To Optional</label>
       <input type="time" id="before">
     </div>
   </div>
 
-  <button id="go">Check availability</button>
+  <button id="go">Check Availability</button>
 </div>
 
 <div id="out"></div>
@@ -212,26 +200,26 @@ button:active {
 const CORS_PROXY = "https://corsproxy.io/?url=";
 
 const VENUES = {
-  "marsfield":"etdta-abuklea-rd-marsfield",
-  "gpa":"mowbray-public-school",
-  "ryde":"ryde-tennis-centre",
-  "artarmon":"artarmon-tennis",
-  "mq":"vince-barclay-coaching-academy",
-  "midson":"etdta-midson-rd-epping"
+  "Marsfield":"etdta-abuklea-rd-marsfield",
+  "GPA":"mowbray-public-school",
+  "Ryde":"ryde-tennis-centre",
+  "Artarmon":"artarmon-tennis",
+  "MQ":"vince-barclay-coaching-academy",
+  "Midson":"etdta-midson-rd-epping"
 };
 
 const KRG = {
-  "allan-small":30,
-  "tyron":8,
-  "roseville":44,
-  "loyal-henry":53,
-  "elizabeth":49
+  "Allan Small":30,
+  "Tyron":8,
+  "Roseville":44,
+  "Loyal Henry":53,
+  "Elizabeth":49
 };
 
 const BCS = {
-  "pennant-hills":["https://etdta.tennisbcs.com.au", null],
-  "beecroft":["https://bltc.tennisbcs.com.au", null],
-  "cowells-lane":["https://etc.tennisbcs.com.au", null]
+  "Pennant Hills":["https://etdta.tennisbcs.com.au", null],
+  "Beecroft":["https://bltc.tennisbcs.com.au", null],
+  "Cowells Lane":["https://etc.tennisbcs.com.au", null]
 };
 
 const BCS_PATH = "/applns/bookings/Bookdisp2.aspx";
@@ -325,9 +313,7 @@ async function sportlogic(key, ymd, slot) {
   let m;
 
   const reH = /data-court-index='(\d+)'>([^<]*)<\/th>/g;
-  while ((m = reH.exec(html))) {
-    courts[m[1]] = m[2];
-  }
+  while ((m = reH.exec(html))) courts[m[1]] = m[2];
 
   const sets = {};
   const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='[^']*?&t=(\d+)/g;
@@ -339,10 +325,7 @@ async function sportlogic(key, ymd, slot) {
   }
 
   const out = {};
-  for (const name in sets) {
-    out[name] = aggregate([...sets[name]].sort(), slot);
-  }
-
+  for (const name in sets) out[name] = aggregate([...sets[name]].sort(), slot);
   return out;
 }
 
@@ -353,7 +336,6 @@ async function krg(key, ymd, slot) {
   const dow = jd === 0 ? 7 : jd;
 
   const oh = await getJSON(`https://krg.bookable.net.au/api/v2/venues/${vid}/getbaseopeninghourslist`);
-
   const courts = [];
 
   for (const it of oh) {
@@ -361,7 +343,6 @@ async function krg(key, ymd, slot) {
     if (!b.startsWith("SC-")) continue;
 
     const det = (it.OpeningHour && it.OpeningHour.Details) || [];
-
     for (const d of det) {
       if (d.DayOfWeek === dow && d.IsOpen && d.OpenTime) {
         courts.push([b, it.SectionName || b, d.OpenTime, d.CloseTime]);
@@ -396,11 +377,9 @@ async function krg(key, ymd, slot) {
 
     while (t + slot <= end) {
       const se = t + slot;
-
       const clash = (booked[b] || []).some(([s,e]) => hm(s) < se && t < hm(e));
 
       if (!clash) free.push(fmt(t));
-
       t += 30;
     }
 
@@ -484,9 +463,7 @@ async function bcs(key, ymd, slot) {
   data["__EVENTTARGET"] = "ctl00$Contentmain$Calendar2";
   data["__EVENTARGUMENT"] = String(arg);
 
-  if (complex) {
-    data["ctl00$Contentmain$ComplexList1"] = complex;
-  }
+  if (complex) data["ctl00$Contentmain$ComplexList1"] = complex;
 
   let doc = await postText(url, data);
 
@@ -501,9 +478,7 @@ async function bcs(key, ymd, slot) {
     d2["__EVENTTARGET"] = "";
     d2["__EVENTARGUMENT"] = "";
 
-    if (complex) {
-      d2["ctl00$Contentmain$ComplexList1"] = complex;
-    }
+    if (complex) d2["ctl00$Contentmain$ComplexList1"] = complex;
 
     d2[name] = val;
 
@@ -512,11 +487,7 @@ async function bcs(key, ymd, slot) {
   }
 
   const out = {};
-
-  for (const nm in merged) {
-    out[nm] = aggregate([...merged[nm]].sort(), slot);
-  }
-
+  for (const nm in merged) out[nm] = aggregate([...merged[nm]].sort(), slot);
   return out;
 }
 
@@ -530,7 +501,7 @@ const vbox = document.getElementById("venues");
 
 ALL.forEach(v => {
   const l = document.createElement("label");
-  const checked = v === "gpa" ? "checked" : "";
+  const checked = v === "GPA" ? "checked" : "";
   l.innerHTML = `<input type="checkbox" value="${esc(v)}" ${checked}> ${esc(v)}`;
   vbox.appendChild(l);
 });
@@ -547,11 +518,11 @@ document.getElementById("go").onclick = async () => {
   const before = document.getElementById("before").value;
 
   if (!venues.length) {
-    out.innerHTML = '<div class="card err">Pick at least one venue.</div>';
+    out.innerHTML = '<div class="card err">Please select at least one venue.</div>';
     return;
   }
 
-  out.innerHTML = '<div class="card mut">Checking availability…</div>';
+  out.innerHTML = '<div class="card mut">Checking availability...</div>';
 
   const blocks = [];
 
@@ -572,10 +543,10 @@ document.getElementById("go").onclick = async () => {
 
       let h = `<div class="card">`;
       h += `<div class="head">${esc(v)}${esc(win)}</div>`;
-      h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book court ↗</a>`;
+      h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`;
 
       if (!courts.length) {
-        h += '<div class="mut">No open slots.</div>';
+        h += '<div class="mut">No open slots found.</div>';
       }
 
       for (const c of courts) {
