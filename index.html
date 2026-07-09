@@ -4,47 +4,187 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Court Availability</title>
+
 <style>
-  :root { --bg:#0f172a; --card:#1e293b; --acc:#2563eb; --txt:#e2e8f0; --mut:#94a3b8; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         background:var(--bg); color:var(--txt); padding:16px; }
-  h1 { font-size:20px; margin:0 0 12px; }
-  .card { background:var(--card); border-radius:12px; padding:14px; margin-bottom:14px; }
-  label { display:block; font-size:13px; color:var(--mut); margin:10px 0 4px; }
-  select, input, button { width:100%; padding:12px; font-size:16px; border-radius:10px;
-         border:1px solid #334155; background:#0b1220; color:var(--txt); }
-  .venues { display:flex; flex-wrap:wrap; gap:8px; }
-  .venues label { display:flex; align-items:center; gap:8px; margin:0;
-         background:#0b1220; border:1px solid #334155; border-radius:10px; padding:10px 12px; color:var(--txt); font-size:15px; }
-  .venues input { width:auto; }
-  .row { display:flex; gap:10px; }
-  .row > div { flex:1; }
-  button { background:var(--acc); border:none; font-weight:600; margin-top:14px; }
-  button:active { opacity:.8; }
-  .court { border-top:1px solid #334155; padding:10px 0; }
-  .court b { color:#60a5fa; }
-  .times { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-  .t { background:#0b1220; border:1px solid #334155; border-radius:8px; padding:6px 9px; font-size:14px; }
-  .head { font-size:16px; font-weight:700; margin:4px 0; }
-  .book { color:#60a5fa; font-size:13px; text-decoration:none; display:inline-block; margin-bottom:4px; }
-  .mut { color:var(--mut); font-size:13px; }
-  .err { color:#f87171; }
+:root {
+  --bg:#020617;
+  --card:#0f172a;
+  --acc:#3b82f6;
+  --acc2:#60a5fa;
+  --txt:#e5e7eb;
+  --mut:#94a3b8;
+  --line:#334155;
+  --danger:#f87171;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:
+    radial-gradient(circle at top left, #1e3a8a66, transparent 35%),
+    linear-gradient(180deg, #020617, #0f172a);
+  color:var(--txt);
+  padding:18px;
+  max-width:920px;
+  margin-inline:auto;
+}
+
+h1 {
+  font-size:26px;
+  margin:6px 0 18px;
+  letter-spacing:-0.03em;
+}
+
+.card {
+  background:rgba(15,23,42,.9);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  backdrop-filter:blur(12px);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+}
+
+label {
+  display:block;
+  font-size:13px;
+  color:var(--mut);
+  margin:10px 0 5px;
+}
+
+select, input, button {
+  width:100%;
+  padding:12px;
+  font-size:16px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#020617;
+  color:var(--txt);
+}
+
+button {
+  background:linear-gradient(135deg, var(--acc), #1d4ed8);
+  border:none;
+  font-weight:800;
+  margin-top:16px;
+  cursor:pointer;
+}
+
+button:hover {
+  filter:brightness(1.08);
+}
+
+button:active {
+  transform:scale(.99);
+}
+
+.row {
+  display:flex;
+  gap:10px;
+}
+
+.row > div {
+  flex:1;
+}
+
+.venues {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.venues label {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  background:#020617;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:9px 12px;
+  color:var(--txt);
+  font-size:14px;
+}
+
+.venues input {
+  width:auto;
+}
+
+.head {
+  font-size:18px;
+  font-weight:800;
+  margin:4px 0 6px;
+}
+
+.book {
+  color:var(--acc2);
+  font-size:13px;
+  text-decoration:none;
+  display:inline-block;
+  margin-bottom:4px;
+}
+
+.court {
+  border-top:1px solid var(--line);
+  padding:11px 0;
+}
+
+.court b {
+  color:var(--acc2);
+}
+
+.times {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:7px;
+}
+
+.t {
+  background:#020617;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 11px;
+  font-size:14px;
+}
+
+.mut {
+  color:var(--mut);
+  font-size:13px;
+}
+
+.err {
+  color:var(--danger);
+}
+
+@media (max-width:640px) {
+  body { padding:14px; }
+  h1 { font-size:23px; }
+  .row { flex-direction:column; gap:0; }
+}
 </style>
 </head>
+
 <body>
-<h1>🎾 Court availability</h1>
+<h1>🎾 Court Availability</h1>
 
 <div class="card">
   <label>Venues</label>
   <div class="venues" id="venues"></div>
 
   <div class="row">
-    <div><label>Date</label><input type="date" id="date"></div>
-    <div><label>Slot size</label>
+    <div>
+      <label>Date</label>
+      <input type="date" id="date">
+    </div>
+
+    <div>
+      <label>Slot size</label>
       <select id="slot">
         <option value="30">30 min</option>
-        <option value="60">1 hour</option>
+        <option value="60" selected>1 hour</option>
         <option value="90">1.5 hour</option>
         <option value="120">2 hour</option>
       </select>
@@ -52,225 +192,414 @@
   </div>
 
   <div class="row">
-    <div><label>From (optional)</label><input type="time" id="after"></div>
-    <div><label>To (optional)</label><input type="time" id="before"></div>
+    <div>
+      <label>From optional</label>
+      <input type="time" id="after">
+    </div>
+
+    <div>
+      <label>To optional</label>
+      <input type="time" id="before">
+    </div>
   </div>
 
-  <label>CORS proxy (switch if one stops working)</label>
-  <select id="proxy">
-    <option value="https://corsproxy.io/?url=">corsproxy.io (supports POST — needed for BCS venues)</option>
-    <option value="https://api.allorigins.win/raw?url=">allorigins (GET only — SportLogic/KRG venues)</option>
-    <option value="">none (direct — only works if not blocked)</option>
-  </select>
-  <div class="mut">Pennant Hills, Epping, Beecroft &amp; Cowells Lane (BCS) need a POST-capable proxy (corsproxy.io).</div>
-
-  <button id="go">Check</button>
+  <button id="go">Check availability</button>
 </div>
 
 <div id="out"></div>
 
 <script>
-const VENUES = { "marsfield":"etdta-abuklea-rd-marsfield", "gpa":"mowbray-public-school", "ryde":"ryde-tennis-centre",
-                 "artarmon":"artarmon-tennis", "mq":"vince-barclay-coaching-academy", "midson":"etdta-midson-rd-epping"};
-const KRG    = { "allan-small":30, "tyron":8, "roseville":44, "loyal-henry":53, "elizabeth":49 };
-// Tennis BCS (ASP.NET WebForms) venues:  key -> [base_url, complex_code or null=use default]
-const BCS    = {
-  "pennant-hills": ["https://etdta.tennisbcs.com.au", null],   // 16 courts, paged (Courts 1-6/7-12/13-16)
-  "beecroft":      ["https://bltc.tennisbcs.com.au", null],
-  "cowells-lane":  ["https://etc.tennisbcs.com.au", null],
+const CORS_PROXY = "https://corsproxy.io/?url=";
+
+const VENUES = {
+  "marsfield":"etdta-abuklea-rd-marsfield",
+  "gpa":"mowbray-public-school",
+  "ryde":"ryde-tennis-centre",
+  "artarmon":"artarmon-tennis",
+  "mq":"vince-barclay-coaching-academy",
+  "midson":"etdta-midson-rd-epping"
 };
+
+const KRG = {
+  "allan-small":30,
+  "tyron":8,
+  "roseville":44,
+  "loyal-henry":53,
+  "elizabeth":49
+};
+
+const BCS = {
+  "pennant-hills":["https://etdta.tennisbcs.com.au", null],
+  "beecroft":["https://bltc.tennisbcs.com.au", null],
+  "cowells-lane":["https://etc.tennisbcs.com.au", null]
+};
+
 const BCS_PATH = "/applns/bookings/Bookdisp2.aspx";
 const ALL = [...Object.keys(VENUES), ...Object.keys(KRG), ...Object.keys(BCS)];
 
-function bookUrl(v){
-  if(v in VENUES) return `https://www.tennisvenues.com.au/booking/${VENUES[v]}`;
-  if(v in BCS)    return BCS[v][0] + BCS_PATH;
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[ch]));
+}
+
+function localDateISO(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function bookUrl(v) {
+  if (v in VENUES) return `https://www.tennisvenues.com.au/booking/${VENUES[v]}`;
+  if (v in BCS) return BCS[v][0] + BCS_PATH;
   return `https://krg.bookable.net.au/venues/${KRG[v]}/`;
 }
 
-// build venue checkboxes
-const vbox = document.getElementById("venues");
-ALL.forEach(v => {
-  const l = document.createElement("label");
-  l.innerHTML = `<input type="checkbox" value="${v}" ${v==="gpa"?"checked":""}> ${v}`;
-  vbox.appendChild(l);
-});
-// default date = today
-document.getElementById("date").value = new Date().toISOString().slice(0,10);
+function prox(u) {
+  return CORS_PROXY + encodeURIComponent(u);
+}
 
-function prox(u){ const p = document.getElementById("proxy").value; return p ? p + encodeURIComponent(u) : u; }
-async function getText(u){ const r = await fetch(prox(u)); if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }
-async function getJSON(u){ return JSON.parse(await getText(u)); }
-async function postText(u, dataObj){
-  const body = new URLSearchParams(dataObj).toString();   // form-urlencoded (encodes + as %2B)
-  const r = await fetch(prox(u), { method:"POST",
-            headers:{ "Content-Type":"application/x-www-form-urlencoded" }, body });
-  if(!r.ok) throw new Error("HTTP "+r.status);
+async function getText(u) {
+  const r = await fetch(prox(u));
+  if (!r.ok) throw new Error("HTTP " + r.status);
   return r.text();
 }
 
-function hm(s){ return (+s.slice(0,2))*60 + (+s.slice(3,5)); }
-function fmt(m){ return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"); }
-
-function aggregate(times, slot){
-  const n = slot/30; if(n<=1) return times;
-  const mins = new Set(times.map(hm));
-  return times.filter(t => { const b = hm(t); for(let k=0;k<n;k++) if(!mins.has(b+30*k)) return false; return true; });
+async function getJSON(u) {
+  return JSON.parse(await getText(u));
 }
 
-async function sportlogic(key, ymd, slot){
+async function postText(u, dataObj) {
+  const body = new URLSearchParams(dataObj).toString();
+  const r = await fetch(prox(u), {
+    method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body
+  });
+
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.text();
+}
+
+function hm(s) {
+  return (+s.slice(0,2)) * 60 + (+s.slice(3,5));
+}
+
+function fmt(m) {
+  return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+}
+
+function aggregate(times, slot) {
+  const n = slot / 30;
+  if (n <= 1) return times;
+
+  const mins = new Set(times.map(hm));
+
+  return times.filter(t => {
+    const b = hm(t);
+    for (let k = 0; k < n; k++) {
+      if (!mins.has(b + 30 * k)) return false;
+    }
+    return true;
+  });
+}
+
+function withinWindow(t, slot, after, before) {
+  const start = hm(t);
+  const end = start + slot;
+  return (!after || start >= hm(after)) && (!before || end <= hm(before));
+}
+
+async function sportlogic(key, ymd, slot) {
   const cid = VENUES[key];
   const url = `https://www.tennisvenues.com.au/booking/${cid}/fetch-booking-data?client_id=${cid}&venue_id=1&resource_id=&date=${ymd}&view=v4`;
+
   const html = await getText(url);
-  const courts = {}; let m;
+
+  const courts = {};
+  let m;
+
   const reH = /data-court-index='(\d+)'>([^<]*)<\/th>/g;
-  while((m = reH.exec(html))) courts[m[1]] = m[2];
+  while ((m = reH.exec(html))) {
+    courts[m[1]] = m[2];
+  }
+
   const sets = {};
   const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='[^']*?&t=(\d+)/g;
-  while((m = reA.exec(html))){
+
+  while ((m = reA.exec(html))) {
     const name = courts[m[1]] || m[1];
-    const t = m[2].padStart(4,"0");
-    (sets[name] = sets[name] || new Set()).add(t.slice(0,2)+":"+t.slice(2));
+    const t = m[2].padStart(4, "0");
+    (sets[name] = sets[name] || new Set()).add(t.slice(0,2) + ":" + t.slice(2));
   }
+
   const out = {};
-  for(const name in sets) out[name] = aggregate([...sets[name]].sort(), slot);
+  for (const name in sets) {
+    out[name] = aggregate([...sets[name]].sort(), slot);
+  }
+
   return out;
 }
 
-async function krg(key, ymd, slot){
+async function krg(key, ymd, slot) {
   const vid = KRG[key];
   const iso = `${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}`;
-  const jd = new Date(iso+"T00:00:00").getDay();   // Sun=0..Sat=6
-  const dow = jd === 0 ? 7 : jd;                    // API: Mon=1..Sun=7
+  const jd = new Date(iso + "T00:00:00").getDay();
+  const dow = jd === 0 ? 7 : jd;
+
   const oh = await getJSON(`https://krg.bookable.net.au/api/v2/venues/${vid}/getbaseopeninghourslist`);
+
   const courts = [];
-  for(const it of oh){
+
+  for (const it of oh) {
     const b = it.BookableID || "";
-    if(!b.startsWith("SC-")) continue;
+    if (!b.startsWith("SC-")) continue;
+
     const det = (it.OpeningHour && it.OpeningHour.Details) || [];
-    for(const d of det){
-      if(d.DayOfWeek === dow && d.IsOpen && d.OpenTime){ courts.push([b, it.SectionName||b, d.OpenTime, d.CloseTime]); break; }
+
+    for (const d of det) {
+      if (d.DayOfWeek === dow && d.IsOpen && d.OpenTime) {
+        courts.push([b, it.SectionName || b, d.OpenTime, d.CloseTime]);
+        break;
+      }
     }
   }
+
   const ids = courts.map(c => c[0]);
-  const bk = await getJSON(`https://krg.bookable.net.au/api/v2/bookingbookablesinperiodandbookableids?bookableIdsStr=${ids.join(",")}&fromDate=${iso}T00:00:00&toDate=${iso}T23:59:59&hideCancelledBooking=true&selectedDatesStr=&hideClosure=true&hideWorkBooking=true`);
+
+  const bk = await getJSON(
+    `https://krg.bookable.net.au/api/v2/bookingbookablesinperiodandbookableids?bookableIdsStr=${ids.join(",")}&fromDate=${iso}T00:00:00&toDate=${iso}T23:59:59&hideCancelledBooking=true&selectedDatesStr=&hideClosure=true&hideWorkBooking=true`
+  );
+
   const booked = {};
-  for(const x of bk){
-    if(ids.includes(x.BookableID) && x.Start_Date && x.End_Date)
-      (booked[x.BookableID] = booked[x.BookableID] || []).push([x.Start_Date.slice(11,16), x.End_Date.slice(11,16)]);
-  }
-  const out = {};
-  for(const [b, name, o, c] of courts){
-    const free = []; let t = hm(o); const end = hm(c);
-    while(t + slot <= end){
-      const se = t + slot;
-      const clash = (booked[b]||[]).some(([s,e]) => hm(s) < se && t < hm(e));
-      if(!clash) free.push(fmt(t));
-      t = se;
+
+  for (const x of bk) {
+    if (ids.includes(x.BookableID) && x.Start_Date && x.End_Date) {
+      (booked[x.BookableID] = booked[x.BookableID] || []).push([
+        x.Start_Date.slice(11,16),
+        x.End_Date.slice(11,16)
+      ]);
     }
+  }
+
+  const out = {};
+
+  for (const [b, name, o, c] of courts) {
+    const free = [];
+    let t = hm(o);
+    const end = hm(c);
+
+    while (t + slot <= end) {
+      const se = t + slot;
+
+      const clash = (booked[b] || []).some(([s,e]) => hm(s) < se && t < hm(e));
+
+      if (!clash) free.push(fmt(t));
+
+      t += 30;
+    }
+
     out[name] = free;
   }
+
   return out;
 }
 
-// ---- Tennis BCS (ASP.NET WebForms): GET hidden fields -> POST calendar postback ----
-function bcsHidden(html){
-  const d = {}; let m;
-  const re = /<input[^>]*type="hidden"[^>]*name="([^"]*)"[^>]*value="([^"]*)"/g;
-  while((m = re.exec(html))) d[m[1]] = m[2];
+function bcsHidden(html) {
+  const d = {};
+  const re = /<input[^>]*type=['"]hidden['"][^>]*>/gi;
+  const nameRe = /name=['"]([^'"]*)['"]/i;
+  const valueRe = /value=['"]([^'"]*)['"]/i;
+
+  for (const tag of html.match(re) || []) {
+    const name = tag.match(nameRe)?.[1];
+    const value = tag.match(valueRe)?.[1] || "";
+    if (name) d[name] = value;
+  }
+
   return d;
 }
-function bcsTime(t){                       // "6:00 AM" -> "06:00"
-  const m = t.match(/(\d{1,2}):(\d{2})/); let h = +m[1]; const mm = m[2];
+
+function bcsTime(t) {
+  const m = t.match(/(\d{1,2}):(\d{2})/);
+  if (!m) return "";
+
+  let h = +m[1];
+  const mm = m[2];
   const ap = t.trim().slice(-2).toUpperCase();
-  if(ap === "PM" && h !== 12) h += 12;
-  if(ap === "AM" && h === 12) h = 0;
-  return String(h).padStart(2,"0") + ":" + mm;
+
+  if (ap === "PM" && h !== 12) h += 12;
+  if (ap === "AM" && h === 12) h = 0;
+
+  return String(h).padStart(2, "0") + ":" + mm;
 }
-function bcsParsePage(doc, into){           // merge free slots from one grid page into `into` {name:Set}
+
+function bcsParsePage(doc, into) {
   const hdr = doc.match(/>Times<[\s\S]*?<\/tr>/);
-  const names = []; let m;
-  if(hdr){ const reN = /colspan="2"[^>]*>([\s\S]*?)<\/th>/g;
-    while((m = reN.exec(hdr[0]))) names.push(m[1].replace(/<[^>]+>/g,"").trim()); }
-  // free slot = Bookmake link with CustID=Available; map by COLUMN position (Court<N>hyper)
+  const names = [];
+  let m;
+
+  if (hdr) {
+    const reN = /colspan="2"[^>]*>([\s\S]*?)<\/th>/g;
+    while ((m = reN.exec(hdr[0]))) {
+      names.push(m[1].replace(/<[^>]+>/g, "").trim());
+    }
+  }
+
   const reA = /_Court(\d+)hyper"[^>]*?href="Bookmake\.aspx\?TimeID=([^&]*)&amp;[^"]*?CustID=Available"/g;
-  while((m = reA.exec(doc))){
+
+  while ((m = reA.exec(doc))) {
     const i = +m[1] - 1;
-    if(i >= 0 && i < names.length){
+
+    if (i >= 0 && i < names.length) {
       const nm = names[i];
-      (into[nm] = into[nm] || new Set()).add(bcsTime(m[2]));
+      const time = bcsTime(m[2]);
+
+      if (time) {
+        (into[nm] = into[nm] || new Set()).add(time);
+      }
     }
   }
 }
-async function bcs(key, ymd, slot){
+
+async function bcs(key, ymd, slot) {
   const [base, complex] = BCS[key];
   const url = base + BCS_PATH;
-  // ASP.NET Calendar day argument = days since 2000-01-01 (UTC, so DST can't shift it)
-  const arg = Math.round((Date.UTC(+ymd.slice(0,4), +ymd.slice(4,6)-1, +ymd.slice(6,8))
-                          - Date.UTC(2000,0,1)) / 86400000);
+
+  const arg = Math.round(
+    (
+      Date.UTC(+ymd.slice(0,4), +ymd.slice(4,6) - 1, +ymd.slice(6,8)) -
+      Date.UTC(2000,0,1)
+    ) / 86400000
+  );
+
   const html = await getText(url);
-  // Select the date. Resubmit EVERY hidden field (dropping __VIEWSTATEENCRYPTED etc.
-  // makes viewstate MAC validation fail). Set the centre dropdown to switch location.
+
   let data = bcsHidden(html);
   data["__EVENTTARGET"] = "ctl00$Contentmain$Calendar2";
   data["__EVENTARGUMENT"] = String(arg);
-  if(complex) data["ctl00$Contentmain$ComplexList1"] = complex;
+
+  if (complex) {
+    data["ctl00$Contentmain$ComplexList1"] = complex;
+  }
+
   let doc = await postText(url, data);
 
   const merged = {};
   bcsParsePage(doc, merged);
-  // extra court-range pages ("Courts 7-12", ...); PageF1 already shown
+
   const pages = [...doc.matchAll(/name="(ctl00\$Contentmain\$PageF\d+)"[^>]*value="([^"]*)"/g)]
-                  .filter(p => !p[1].endsWith("PageF1"));
-  for(const [, name, val] of pages){
-    let d2 = bcsHidden(doc);               // refreshed viewstate from current page
-    d2["__EVENTTARGET"] = ""; d2["__EVENTARGUMENT"] = "";
-    if(complex) d2["ctl00$Contentmain$ComplexList1"] = complex;
-    d2[name] = val;                        // "click" the page button
+    .filter(p => !p[1].endsWith("PageF1"));
+
+  for (const [, name, val] of pages) {
+    let d2 = bcsHidden(doc);
+    d2["__EVENTTARGET"] = "";
+    d2["__EVENTARGUMENT"] = "";
+
+    if (complex) {
+      d2["ctl00$Contentmain$ComplexList1"] = complex;
+    }
+
+    d2[name] = val;
+
     doc = await postText(url, d2);
     bcsParsePage(doc, merged);
   }
+
   const out = {};
-  for(const nm in merged) out[nm] = aggregate([...merged[nm]].sort(), slot);
+
+  for (const nm in merged) {
+    out[nm] = aggregate([...merged[nm]].sort(), slot);
+  }
+
   return out;
 }
 
-async function checkVenue(v, ymd, slot){
-  if(v in VENUES) return sportlogic(v, ymd, slot);
-  if(v in BCS)    return bcs(v, ymd, slot);
+async function checkVenue(v, ymd, slot) {
+  if (v in VENUES) return sportlogic(v, ymd, slot);
+  if (v in BCS) return bcs(v, ymd, slot);
   return krg(v, ymd, slot);
 }
 
+const vbox = document.getElementById("venues");
+
+ALL.forEach(v => {
+  const l = document.createElement("label");
+  const checked = v === "gpa" ? "checked" : "";
+  l.innerHTML = `<input type="checkbox" value="${esc(v)}" ${checked}> ${esc(v)}`;
+  vbox.appendChild(l);
+});
+
+document.getElementById("date").value = localDateISO();
+
 document.getElementById("go").onclick = async () => {
   const out = document.getElementById("out");
+
   const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
-  const ymd = document.getElementById("date").value.replace(/-/g,"");
+  const ymd = document.getElementById("date").value.replace(/-/g, "");
   const slot = +document.getElementById("slot").value;
-  const after = document.getElementById("after").value;   // "" or "HH:MM"
+  const after = document.getElementById("after").value;
   const before = document.getElementById("before").value;
-  if(!venues.length){ out.innerHTML = '<div class="card err">Pick at least one venue.</div>'; return; }
-  out.innerHTML = '<div class="card mut">Checking…</div>';
+
+  if (!venues.length) {
+    out.innerHTML = '<div class="card err">Pick at least one venue.</div>';
+    return;
+  }
+
+  out.innerHTML = '<div class="card mut">Checking availability…</div>';
+
   const blocks = [];
-  for(const v of venues){
+
+  for (const v of venues) {
     try {
       let a = await checkVenue(v, ymd, slot);
-      if(after || before){
+
+      if (after || before) {
         const f = {};
-        for(const c in a) f[c] = a[c].filter(t => (!after || t >= after) && (!before || t < before));
+        for (const c in a) {
+          f[c] = a[c].filter(t => withinWindow(t, slot, after, before));
+        }
         a = f;
       }
+
       const courts = Object.keys(a).sort().filter(c => a[c].length);
-      const win = (after||before) ? `  [${after||".."}-${before||".."}]` : "";
-      let h = `<div class="card"><div class="head">${v}${win}</div>`;
-      h += `<a class="book" href="${bookUrl(v)}" target="_blank" rel="noopener">book ↗</a>`;
-      if(!courts.length) h += '<div class="mut">No open slots.</div>';
-      for(const c of courts)
-        h += `<div class="court"><a class="book" href="${bookUrl(v)}" target="_blank" rel="noopener"><b>${c}</b> ↗</a> (${a[c].length})<div class="times">${a[c].map(t=>`<span class="t">${t}</span>`).join("")}</div></div>`;
-      blocks.push(h + "</div>");
-    } catch(e){
-      blocks.push(`<div class="card err">${v}: ${e.message}. Try a different proxy above, or use mobile data.</div>`);
+      const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
+
+      let h = `<div class="card">`;
+      h += `<div class="head">${esc(v)}${esc(win)}</div>`;
+      h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book court ↗</a>`;
+
+      if (!courts.length) {
+        h += '<div class="mut">No open slots.</div>';
+      }
+
+      for (const c of courts) {
+        h += `
+          <div class="court">
+            <a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">
+              <b>${esc(c)}</b> ↗
+            </a>
+            <span class="mut">(${a[c].length})</span>
+            <div class="times">
+              ${a[c].map(t => `<span class="t">${esc(t)}</span>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      h += "</div>";
+      blocks.push(h);
+
+    } catch (e) {
+      blocks.push(`<div class="card err">${esc(v)}: ${esc(e.message)}. Please try again later.</div>`);
     }
   }
+
   out.innerHTML = blocks.join("");
 };
 </script>
