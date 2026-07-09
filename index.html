@@ -179,6 +179,42 @@ button.secondary {
   font-weight:800;
 }
 
+.venue-meta {
+  display:grid;
+  grid-template-columns:20px 1fr;
+  gap:9px 10px;
+  align-items:start;
+  margin:10px 0 12px;
+  padding:13px 15px;
+  background:var(--card-soft);
+  border:1px solid var(--line);
+  border-radius:16px;
+  font-size:14px;
+  line-height:1.4;
+  color:var(--txt);
+}
+
+.venue-meta .mi {
+  text-align:center;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.venue-meta a {
+  color:var(--acc2);
+  text-decoration:none;
+  font-weight:700;
+  word-break:break-word;
+}
+
+.venue-meta a.book {
+  margin:0;
+}
+
+.venue-meta a:hover {
+  text-decoration:underline;
+}
+
 .court {
   border-top:1px solid var(--line-soft);
   padding:12px 0;
@@ -194,12 +230,27 @@ button.secondary {
 }
 
 .t {
+  display:inline-block;
   background:var(--card-soft);
   border:1px solid var(--line);
   border-radius:999px;
   padding:7px 11px;
   font-size:14px;
   font-weight:650;
+  color:var(--txt);
+  text-decoration:none;
+  cursor:pointer;
+  transition:background .15s, border-color .15s, color .15s, transform .05s;
+}
+
+a.t:hover {
+  background:#fce7f3;
+  border-color:var(--acc);
+  color:#831843;
+}
+
+a.t:active {
+  transform:translateY(1px);
 }
 
 .mut {
@@ -584,6 +635,38 @@ const BCS = {
 const BCS_PATH = "/applns/bookings/Bookdisp2.aspx";
 const ALL = [...Object.keys(VENUES), ...Object.keys(KRG), ...Object.keys(BCS)];
 
+// Venue contact details. Fill in "address" and "phone" for each venue.
+// The Google Maps link is generated automatically from the address
+// (or the venue name if the address is left blank).
+const DETAILS = {
+  "Marsfield":     { address:"87 Abuklea Rd, Marsfield NSW 2122", phone:"0408401462", email:"info@tennisnation.com.au", map:"https://www.google.com/maps/place/Abuklea+Road+Tennis+Courts/@-33.786991,151.103969,17z" },
+  "GPA":           { address:"626/656 Mowbray Rd W, Lane Cove North NSW 2066", phone:"0412387276", email:"gian@gpatennis.com.au", map:"https://www.google.com/maps/place/GPA+Tennis/@-33.8044943,151.1564573,17z" },
+  "Ryde":          { address:"Weaver St, Ryde NSW 2112", phone:"0291337915", email:"ryde@voyagertennis.com", map:"https://www.google.com/maps/place/Voyager+Tennis+-+Ryde/@-33.8222532,151.1182915,17z" },
+  "Artarmon":      { address:"Corner of Hampden and, Barton Rd, Artarmon NSW 2064", phone:"0291337915", email:"artarmon@voyagertennis.com" },
+  "MQ":            { address:"158 Talavera Rd, Marsfield NSW 2122", phone:"0298770679", email:"vince@barclayacademy.com" },
+  "Midson":        { address:"97 Midson Rd, Epping NSW 2121", phone:"0296171723", email:"info@northwestsydneytennis.com.au" },
+  "Allan Small":   { address:"18A Saiala Rd, East Killara NSW 2071", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/place/Allan+Small+Park+Tennis+Courts/@-33.7536858,151.1818736,17z" },
+  "Tyron":         { address:"81 Tryon Rd, East Lindfield NSW 2070", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
+  "Roseville":     { address:"60B Clanville Rd, Roseville NSW 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
+  "Loyal Henry":   { address:"Loyal Henry Park Bromborough Road Roseville 2069", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au" },
+  "Elizabeth":     { address:"Queen Elizabeth Reserve Bradfield Road Killara 2071", phone:"0294240754", email:"recreationbookings@krg.nsw.gov.au", map:"https://www.google.com/maps/place/Queen+Elizabeth+Reserve/@-33.7801283,151.1486944,17z" },
+  "Pennant Hills": { address:"Pennant Hills Park, 25X Britannia St, Pennant Hills NSW 2120", phone:"0294810970", email:"info@northwestsydneytennis.com.au" },
+  "Beecroft":      { address:"The Village Green, Beecroft Rd & The Crescent, Beecroft NSW 2119", phone:"0298761893", email:"info@beecroftlawntennis.org.au" },
+  "Cowells Lane":  { address:"22A Cowells Ln, Ermington NSW 2115", phone:"0298047111", email:"tennisbookings@ermingtonunited.com.au" }
+};
+
+function mapUrl(v) {
+  const d = DETAILS[v] || {};
+  if (d.map) return d.map;
+  const q = d.address || v;
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+}
+
+// Courts to hide from a venue's results, matched case-insensitively by name.
+const HIDE_COURTS = {
+  "Marsfield": /mini/i
+};
+
 function esc(s) {
   return String(s).replace(/[&<>"']/g, ch => ({
     "&":"&amp;",
@@ -752,17 +835,26 @@ async function sportlogic(key, ymd, slot) {
   }
 
   const sets = {};
-  const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='[^']*?&t=(\d+)/g;
+  const urls = {};
+  const base = `https://www.tennisvenues.com.au/booking/${cid}/`;
+  const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='([^']*)'/g;
 
   while ((m = reA.exec(html))) {
     const name = courts[m[1]] || m[1];
-    const t = m[2].padStart(4, "0");
-    (sets[name] = sets[name] || new Set()).add(t.slice(0,2) + ":" + t.slice(2));
+    const href = m[2];
+    const tm = href.match(/[?&]t=(\d+)/);
+    if (!tm) continue;
+
+    const t = tm[1].padStart(4, "0");
+    const time = t.slice(0,2) + ":" + t.slice(2);
+
+    (sets[name] = sets[name] || new Set()).add(time);
+    (urls[name] = urls[name] || {})[time] = new URL(href.replace(/&amp;/g, "&"), base).href;
   }
 
-  const out = {};
-  for (const name in sets) out[name] = aggregate([...sets[name]].sort(), slot);
-  return out;
+  const slots = {};
+  for (const name in sets) slots[name] = aggregate([...sets[name]].sort(), slot);
+  return { slots, urls };
 }
 
 async function krg(key, ymd, slot) {
@@ -851,7 +943,9 @@ async function krg(key, ymd, slot) {
     out[name] = [...free].sort();
   }
 
-  return out;
+  // Bookable (Attekus) is a single-page app that keeps the date in client-side
+  // state — no per-slot or per-date URL, so callers fall back to the venue page.
+  return { slots: out, urls: {} };
 }
 
 function bcsHidden(html) {
@@ -883,7 +977,7 @@ function bcsTime(t) {
   return String(h).padStart(2, "0") + ":" + mm;
 }
 
-function bcsParsePage(doc, into) {
+function bcsParsePage(doc, into, urls, dir) {
   const hdr = doc.match(/>Times<[\s\S]*?<\/tr>/);
   const names = [];
   let m;
@@ -895,17 +989,18 @@ function bcsParsePage(doc, into) {
     }
   }
 
-  const reA = /_Court(\d+)hyper["'][^>]*?href=["']Bookmake\.aspx\?TimeID=([^&"']+)&amp;[^"']*?CustID=Available/g;
+  const reA = /_Court(\d+)hyper["'][^>]*?href=["'](Bookmake\.aspx\?TimeID=([^&"']+)&amp;[^"']*?CustID=Available[^"']*)["']/g;
 
   while ((m = reA.exec(doc))) {
     const i = +m[1] - 1;
 
     if (i >= 0 && i < names.length) {
       const nm = names[i];
-      const time = bcsTime(decodeURIComponent(m[2]));
+      const time = bcsTime(decodeURIComponent(m[3]));
 
       if (time) {
         (into[nm] = into[nm] || new Set()).add(time);
+        (urls[nm] = urls[nm] || {})[time] = new URL(m[2].replace(/&amp;/g, "&"), dir).href;
       }
     }
   }
@@ -914,6 +1009,7 @@ function bcsParsePage(doc, into) {
 async function bcs(key, ymd, slot) {
   const [base, complex] = BCS[key];
   const url = base + BCS_PATH;
+  const dir = new URL("./", url).href;
 
   const arg = Math.round(
     (
@@ -933,7 +1029,8 @@ async function bcs(key, ymd, slot) {
   let doc = await postText(url, data);
 
   const merged = {};
-  bcsParsePage(doc, merged);
+  const mergedUrls = {};
+  bcsParsePage(doc, merged, mergedUrls, dir);
 
   const pageMatches = [
     ...doc.matchAll(/name=["'](ctl00\$Contentmain\$PageF\d+)["'][^>]*value=["']([^"']*)["']/g)
@@ -949,33 +1046,52 @@ async function bcs(key, ymd, slot) {
     d2[name] = val;
 
     doc = await postText(url, d2);
-    bcsParsePage(doc, merged);
+    bcsParsePage(doc, merged, mergedUrls, dir);
   }
 
-  const out = {};
-  for (const nm in merged) out[nm] = aggregate([...merged[nm]].sort(), slot);
-  return out;
+  const slots = {};
+  for (const nm in merged) slots[nm] = aggregate([...merged[nm]].sort(), slot);
+  return { slots, urls: mergedUrls };
 }
 
 async function checkVenue(v, ymd, slot) {
-  if (v in VENUES) return sportlogic(v, ymd, slot);
-  if (v in BCS) return bcs(v, ymd, slot);
-  return krg(v, ymd, slot);
+  let res;
+  if (v in VENUES) res = await sportlogic(v, ymd, slot);
+  else if (v in BCS) res = await bcs(v, ymd, slot);
+  else res = await krg(v, ymd, slot);
+
+  const { slots, urls } = res;
+  const hide = HIDE_COURTS[v];
+  if (hide) {
+    for (const c in slots) {
+      if (hide.test(c)) {
+        delete slots[c];
+        delete urls[c];
+      }
+    }
+  }
+
+  return { slots, urls };
 }
 
-function renderVenueResult(v, a, after, before) {
-  const courts = Object.keys(a).sort((x, y) => {
-    const ax = a[x][0] ? hm(a[x][0]) : Infinity;
-    const ay = a[y][0] ? hm(a[y][0]) : Infinity;
-    return ax - ay || x.localeCompare(y);
-  }).filter(c => a[c].length);
+function renderVenueResult(v, a, urls, after, before) {
+  const courts = Object.keys(a)
+    .filter(c => a[c].length)
+    .sort((x, y) => x.localeCompare(y, undefined, { numeric: true }));
 
   const totalSlots = courts.reduce((sum, c) => sum + a[c].length, 0);
   const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
 
   let h = `<div class="card">`;
   h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${totalSlots ? "ok" : "mut"}">${totalSlots} Slot${totalSlots === 1 ? "" : "s"}</div></div>`;
-  h += `<a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`;
+  const d = DETAILS[v] || {};
+  const rows = [];
+  rows.push(`<span class="mi">🎾</span><a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`);
+  if (d.address) rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener" title="Open in Google Maps">${esc(d.address)} ↗</a>`);
+  else rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener">Open in Google Maps ↗</a>`);
+  if (d.phone) rows.push(`<span class="mi">📞</span><a href="tel:${esc(d.phone.replace(/[^\d+]/g, ""))}">${esc(d.phone)}</a>`);
+  if (d.email) rows.push(`<span class="mi">✉️</span><a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`);
+  h += `<div class="venue-meta">${rows.join("")}</div>`;
 
   if (!courts.length) {
     h += '<div class="mut">No open slots found.</div>';
@@ -989,7 +1105,10 @@ function renderVenueResult(v, a, after, before) {
         </a>
         <span class="mut">(${a[c].length})</span>
         <div class="times">
-          ${a[c].map(t => `<span class="t">${esc(t)}</span>`).join("")}
+          ${a[c].map(t => {
+            const href = (urls && urls[c] && urls[c][t]) || bookUrl(v);
+            return `<a class="t" href="${esc(href)}" target="_blank" rel="noopener" title="Book ${esc(t)}">${esc(t)}</a>`;
+          }).join("")}
         </div>
       </div>
     `;
@@ -1061,7 +1180,8 @@ document.getElementById("go").onclick = async () => {
   try {
     const results = await Promise.allSettled(
       venues.map(async v => {
-        let a = await checkVenue(v, ymd, slot);
+        const { slots, urls } = await checkVenue(v, ymd, slot);
+        let a = slots;
 
         if (after || before) {
           const f = {};
@@ -1071,7 +1191,7 @@ document.getElementById("go").onclick = async () => {
           a = f;
         }
 
-        return { v, a };
+        return { v, a, urls };
       })
     );
 
@@ -1096,7 +1216,7 @@ document.getElementById("go").onclick = async () => {
     const blocks = [];
 
     for (const item of ok) {
-      blocks.push(renderVenueResult(item.v, item.a, after, before));
+      blocks.push(renderVenueResult(item.v, item.a, item.urls, after, before));
     }
 
     for (const item of fail) {
