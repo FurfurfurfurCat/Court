@@ -357,6 +357,73 @@ button.secondary {
   button { position:sticky; bottom:12px; z-index:5; }
   button.secondary { position:static; }
 }
+
+/* Consistent control style fix */
+:root {
+  --control-radius:18px;
+  --control-height:54px;
+}
+
+input,
+select,
+button,
+button.secondary,
+.venues label,
+.t {
+  border-radius:var(--control-radius) !important;
+}
+
+.form-grid input,
+.form-grid select {
+  height:var(--control-height) !important;
+  min-height:var(--control-height) !important;
+  line-height:1.2 !important;
+  padding:0 18px !important;
+  background:#fffafd !important;
+  border:1px solid #f5d6e6 !important;
+  border-radius:var(--control-radius) !important;
+  font-size:16px !important;
+  font-weight:600 !important;
+  color:#3f1d2f !important;
+}
+
+input[type="date"] {
+  appearance:none;
+  -webkit-appearance:none;
+  display:block;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align:left;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity:.65;
+  cursor:pointer;
+}
+
+select {
+  appearance:auto;
+  -webkit-appearance:auto;
+}
+
+#go,
+.primary-button {
+  border-radius:var(--control-radius) !important;
+}
+
+.card {
+  border-radius:28px !important;
+}
+
+.venue-top {
+  margin-bottom:18px !important;
+}
+
+.venues {
+  margin-top:16px !important;
+}
+
 </style>
 </head>
 
@@ -478,9 +545,12 @@ button.secondary {
 <div id="out"></div>
 
 <script>
-// Replace this with your real Cloudflare Worker URL after deployment.
-// Example: const PROXY = "https://tennis-proxy.your-name.workers.dev/?url=";
-const PROXY = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/?url=";
+// Proxy setting.
+// Point this at your deployed Cloudflare Worker (see court-proxy-worker.js).
+// Replace the workers.dev host below with your own worker URL, keeping "/?url=" at the end.
+// You can temporarily fall back to "https://corsproxy.io/?url=" but POST-based
+// venues (Pennant Hills / Beecroft / Cowells Lane) will not work through it.
+const PROXY = "https://court-proxy.YOUR-SUBDOMAIN.workers.dev/?url=";
 
 const VENUES = {
   "Marsfield":"etdta-abuklea-rd-marsfield",
@@ -541,6 +611,11 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
 
   try {
     return await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e.name === "AbortError") {
+      throw new Error(`Timed out after ${Math.round(timeoutMs / 1000)}s`);
+    }
+    throw e;
   } finally {
     clearTimeout(timer);
   }
@@ -622,6 +697,10 @@ async function sportlogic(key, ymd, slot) {
   const reH = /data-court-index='(\d+)'>([^<]*)<\/th>/g;
   while ((m = reH.exec(html))) courts[m[1]] = m[2];
 
+  if (!Object.keys(courts).length) {
+    throw new Error("Could not read court list (site layout may have changed)");
+  }
+
   const sets = {};
   const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='[^']*?&t=(\d+)/g;
 
@@ -650,13 +729,15 @@ async function krg(key, ymd, slot) {
     if (!b.startsWith("SC-")) continue;
 
     const det = (it.OpeningHour && it.OpeningHour.Details) || [];
+    const windows = [];
 
     for (const d of det) {
-      if (d.DayOfWeek === dow && d.IsOpen && d.OpenTime) {
-        courts.push([b, it.SectionName || b, d.OpenTime, d.CloseTime]);
-        break;
+      if (d.DayOfWeek === dow && d.IsOpen && d.OpenTime && d.CloseTime) {
+        windows.push([d.OpenTime, d.CloseTime]);
       }
     }
+
+    if (windows.length) courts.push([b, it.SectionName || b, windows]);
   }
 
   const ids = courts.map(c => c[0]);
@@ -679,20 +760,23 @@ async function krg(key, ymd, slot) {
 
   const out = {};
 
-  for (const [b, name, o, c] of courts) {
-    const free = [];
-    let t = hm(o);
-    const end = hm(c);
+  for (const [b, name, windows] of courts) {
+    const free = new Set();
 
-    while (t + slot <= end) {
-      const se = t + slot;
-      const clash = (booked[b] || []).some(([s,e]) => hm(s) < se && t < hm(e));
+    for (const [o, c] of windows) {
+      let t = hm(o);
+      const end = hm(c);
 
-      if (!clash) free.push(fmt(t));
-      t += 30;
+      while (t + slot <= end) {
+        const se = t + slot;
+        const clash = (booked[b] || []).some(([s,e]) => hm(s) < se && t < hm(e));
+
+        if (!clash) free.add(fmt(t));
+        t += 30;
+      }
     }
 
-    out[name] = free;
+    out[name] = [...free].sort();
   }
 
   return out;
@@ -853,6 +937,7 @@ ALL.forEach(v => {
 });
 
 document.getElementById("date").value = localDateISO();
+document.getElementById("date").min = localDateISO();
 
 document.getElementById("selectAll").onclick = () => {
   document.querySelectorAll(".venues input").forEach(c => c.checked = true);
@@ -879,6 +964,16 @@ document.getElementById("go").onclick = async () => {
 
   if (after && before && hm(after) >= hm(before)) {
     out.innerHTML = '<div class="card err">Please make sure the "From Optional" time is earlier than the "To Optional" time.</div>';
+    return;
+  }
+
+  const chosen = document.getElementById("date").value;
+  if (!chosen) {
+    out.innerHTML = '<div class="card err">Please choose a date.</div>';
+    return;
+  }
+  if (chosen < localDateISO()) {
+    out.innerHTML = '<div class="card err">Please choose today or a future date.</div>';
     return;
   }
 
