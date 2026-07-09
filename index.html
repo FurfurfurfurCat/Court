@@ -550,7 +550,7 @@ select {
 // Replace the workers.dev host below with your own worker URL, keeping "/?url=" at the end.
 // You can temporarily fall back to "https://corsproxy.io/?url=" but POST-based
 // venues (Pennant Hills / Beecroft / Cowells Lane) will not work through it.
-const PROXY = "https://court-proxy.YOUR-SUBDOMAIN.workers.dev/?url=";
+const PROXY = "https://court-proxy.t5nd2ckjrm.workers.dev/?url=";
 
 const VENUES = {
   "Marsfield":"etdta-abuklea-rd-marsfield",
@@ -931,8 +931,7 @@ const vbox = document.getElementById("venues");
 
 ALL.forEach(v => {
   const l = document.createElement("label");
-  const checked = v === "GPA" ? "checked" : "";
-  l.innerHTML = `<input type="checkbox" value="${esc(v)}" ${checked}> ${esc(v)}`;
+  l.innerHTML = `<input type="checkbox" value="${esc(v)}"> ${esc(v)}`;
   vbox.appendChild(l);
 });
 
