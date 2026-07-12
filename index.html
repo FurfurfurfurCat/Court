@@ -482,46 +482,44 @@ button.secondary,
   margin-top:16px !important;
 }
 
-/* Falling sakura petals (decorative, non-interactive). */
-#sakura,
-#sakura-front {
+/* Falling cute cats (decorative, non-interactive). */
+#cats,
+#cats-front {
   position:fixed;
   inset:0;
   overflow:hidden;
   pointer-events:none;
 }
 
-#sakura { z-index:-1; }        /* behind the cards */
-#sakura-front { z-index:9999; } /* drifting over the content */
+#cats { z-index:-1; }         /* behind the cards */
+#cats-front { z-index:9999; } /* drifting over the content */
 
-.petal {
+.cat {
   position:absolute;
-  top:-6vh;
-  width:14px;
-  height:14px;
-  border-radius:100% 0 100% 0;
-  background:linear-gradient(135deg, #fde4f1, #f9a8d4);
-  box-shadow:0 1px 2px rgba(219,39,119,.15);
+  top:-8vh;
+  font-size:26px;
+  line-height:1;
   opacity:0;
+  user-select:none;
   will-change:transform, opacity;
-  animation-name:sakura-fall;
+  animation-name:cat-fall;
   animation-timing-function:ease-in-out;
   animation-iteration-count:infinite;
 }
 
-@keyframes sakura-fall {
-  0%   { transform:translateY(-6vh)  translateX(0)     rotate(0deg);   opacity:0; }
-  8%   { opacity:.8; }
-  25%  { transform:translateY(22vh)  translateX(26px)  rotate(90deg); }
-  50%  { transform:translateY(50vh)  translateX(-22px) rotate(180deg); }
-  75%  { transform:translateY(76vh)  translateX(26px)  rotate(270deg); }
-  92%  { opacity:.8; }
-  100% { transform:translateY(112vh) translateX(0)     rotate(360deg); opacity:0; }
+@keyframes cat-fall {
+  0%   { transform:translateY(-8vh)  translateX(0)     rotate(-8deg);  opacity:0; }
+  8%   { opacity:.9; }
+  25%  { transform:translateY(22vh)  translateX(26px)  rotate(8deg); }
+  50%  { transform:translateY(50vh)  translateX(-22px) rotate(-8deg); }
+  75%  { transform:translateY(76vh)  translateX(26px)  rotate(8deg); }
+  92%  { opacity:.9; }
+  100% { transform:translateY(112vh) translateX(0)     rotate(-8deg);  opacity:0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #sakura,
-  #sakura-front { display:none; }
+  #cats,
+  #cats-front { display:none; }
 }
 
 </style>
@@ -1117,6 +1115,27 @@ async function checkVenue(v, ymd, slot) {
   return { slots, urls };
 }
 
+function venueMetaHtml(v) {
+  const d = DETAILS[v] || {};
+  const rows = [];
+  rows.push(`<span class="mi">🎾</span><a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`);
+  if (d.address) rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener" title="Open in Google Maps">${esc(d.address)} ↗</a>`);
+  else rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener">Open in Google Maps ↗</a>`);
+  if (d.phone) rows.push(`<span class="mi">📞</span><a href="tel:${esc(d.phone.replace(/[^\d+]/g, ""))}">${esc(d.phone)}</a>`);
+  if (d.email) rows.push(`<span class="mi">✉️</span><a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`);
+  return `<div class="venue-meta">${rows.join("")}</div>`;
+}
+
+// Basic info card shown as soon as a venue is selected (no network request).
+function renderVenueBasic(v) {
+  let h = `<div class="card">`;
+  h += `<div class="summary"><div class="head">${esc(v)}</div></div>`;
+  h += venueMetaHtml(v);
+  h += `<div class="mut">Press “Check Availability” to load open times.</div>`;
+  h += `</div>`;
+  return h;
+}
+
 function renderVenueResult(v, a, urls, after, before) {
   const courts = Object.keys(a)
     .filter(c => a[c].length)
@@ -1127,14 +1146,7 @@ function renderVenueResult(v, a, urls, after, before) {
 
   let h = `<div class="card">`;
   h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${totalSlots ? "ok" : "mut"}">${totalSlots} Slot${totalSlots === 1 ? "" : "s"}</div></div>`;
-  const d = DETAILS[v] || {};
-  const rows = [];
-  rows.push(`<span class="mi">🎾</span><a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">Book Court ↗</a>`);
-  if (d.address) rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener" title="Open in Google Maps">${esc(d.address)} ↗</a>`);
-  else rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener">Open in Google Maps ↗</a>`);
-  if (d.phone) rows.push(`<span class="mi">📞</span><a href="tel:${esc(d.phone.replace(/[^\d+]/g, ""))}">${esc(d.phone)}</a>`);
-  if (d.email) rows.push(`<span class="mi">✉️</span><a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`);
-  h += `<div class="venue-meta">${rows.join("")}</div>`;
+  h += venueMetaHtml(v);
 
   if (!courts.length) {
     h += '<div class="mut">No open slots found.</div>';
@@ -1172,12 +1184,23 @@ ALL.forEach(v => {
 document.getElementById("date").value = localDateISO();
 document.getElementById("date").min = localDateISO();
 
+// Show each selected venue's basic info immediately, without fetching availability.
+function updatePreview() {
+  const out = document.getElementById("out");
+  const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
+  out.innerHTML = venues.length ? venues.map(renderVenueBasic).join("") : "";
+}
+
+vbox.addEventListener("change", updatePreview);
+
 document.getElementById("selectAll").onclick = () => {
   document.querySelectorAll(".venues input").forEach(c => c.checked = true);
+  updatePreview();
 };
 
 document.getElementById("clearAll").onclick = () => {
   document.querySelectorAll(".venues input").forEach(c => c.checked = false);
+  updatePreview();
 };
 
 document.getElementById("go").onclick = async () => {
@@ -1274,35 +1297,28 @@ document.getElementById("go").onclick = async () => {
   }
 };
 
-// Sakura petals drifting both behind and over the content.
-(function sakura() {
+// Cute cats drifting both behind and over the content.
+(function cats() {
   const back = document.createElement("div");
-  back.id = "sakura";
+  back.id = "cats";
   const front = document.createElement("div");
-  front.id = "sakura-front";
+  front.id = "cats-front";
   document.body.appendChild(back);
   document.body.appendChild(front);
 
-  const tints = [
-    "linear-gradient(135deg, #fde4f1, #f9a8d4)",
-    "linear-gradient(135deg, #fbcfe8, #f472b6)",
-    "linear-gradient(135deg, #fce7f3, #f9a8d4)"
-  ];
+  const faces = ["🍑", "💕", "💗", "💖", "🩷", "🌸"];
 
   const COUNT = 30;
   for (let i = 0; i < COUNT; i++) {
-    const p = document.createElement("div");
-    p.className = "petal";
-    const size = 8 + Math.random() * 10;
-    p.style.left = (Math.random() * 100) + "vw";
-    p.style.width = size + "px";
-    p.style.height = size + "px";
-    p.style.backgroundImage = tints[Math.floor(Math.random() * tints.length)];
-    p.style.animationDuration = (7 + Math.random() * 8) + "s";
-    p.style.animationDelay = (-Math.random() * 15) + "s";
-    if (Math.random() < 0.5) p.style.borderRadius = "0 100% 0 100%";
+    const c = document.createElement("div");
+    c.className = "cat";
+    c.textContent = faces[Math.floor(Math.random() * faces.length)];
+    c.style.left = (Math.random() * 100) + "vw";
+    c.style.fontSize = (18 + Math.random() * 20) + "px";
+    c.style.animationDuration = (7 + Math.random() * 8) + "s";
+    c.style.animationDelay = (-Math.random() * 15) + "s";
     // ~40% drift in front of the content, the rest behind.
-    (Math.random() < 0.4 ? front : back).appendChild(p);
+    (Math.random() < 0.4 ? front : back).appendChild(c);
   }
 })();
 </script>
