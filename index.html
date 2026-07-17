@@ -1456,7 +1456,7 @@ function renderWeatherStrip(dates) {
   }).join("");
 
   return `<div class="card wx-strip">
-    <div class="wx-title">🌤️ 7-day weather · northern Sydney</div>
+    <div class="wx-title">🌤️ 12-day weather · northern Sydney</div>
     <div class="wx-row">${chips}</div>
   </div>`;
 }
@@ -1730,10 +1730,10 @@ document.getElementById("go").onclick = async () => {
   const dates = [];
   for (let i = 0; i < days; i++) dates.push(addDaysISO(chosen, i));
 
-  // The weather strip always shows a 7-day outlook from the chosen date,
+  // The weather strip always shows a 12-day outlook from the chosen date,
   // independent of how many days of availability are being checked.
   const weatherDates = [];
-  for (let i = 0; i < 7; i++) weatherDates.push(addDaysISO(chosen, i));
+  for (let i = 0; i < 12; i++) weatherDates.push(addDaysISO(chosen, i));
 
   button.disabled = true;
   button.textContent = "Checking...";
