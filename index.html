@@ -216,6 +216,42 @@ button.secondary {
   text-decoration:underline;
 }
 
+.court-day {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:-0.02em;
+  color:#831843;
+  margin:24px 0 14px;
+  padding:12px 16px;
+  background:#fce7f3;
+  border:1px solid var(--line-soft);
+  border-radius:16px;
+}
+
+.court-day:first-of-type {
+  margin-top:12px;
+}
+
+.court-day + .court {
+  border-top:none;
+  padding-top:6px;
+}
+
+.court-day .cd-count {
+  color:var(--acc2);
+  font-weight:800;
+  font-size:13px;
+  background:#fff;
+  border:1px solid var(--line-soft);
+  border-radius:999px;
+  padding:3px 10px;
+}
+
 .court {
   border-top:1px solid var(--line-soft);
   padding:12px 0;
@@ -545,6 +581,18 @@ button.secondary,
     </div>
 
     <div class="field">
+      <label>Days</label>
+      <select id="days">
+        <option value="1" selected>Just this day</option>
+        <option value="2">Next 2 days</option>
+        <option value="3">Next 3 days</option>
+        <option value="5">Next 5 days</option>
+        <option value="7">Next 7 days</option>
+        <option value="14">Next 2 weeks</option>
+      </select>
+    </div>
+
+    <div class="field">
       <label>Slot Size</label>
       <select id="slot">
         <option value="30">30 Minutes</option>
@@ -723,6 +771,19 @@ function localDateISO(d = new Date()) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+// Returns the ISO date n days after the given ISO date (local time).
+function addDaysISO(iso, n) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return localDateISO(d);
+}
+
+// Friendly heading like "Friday, 18 Jul".
+function dayLabel(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" });
 }
 
 function bookUrl(v) {
@@ -1136,37 +1197,76 @@ function renderVenueBasic(v) {
   return h;
 }
 
-function renderVenueResult(v, a, urls, after, before) {
-  const courts = Object.keys(a)
-    .filter(c => a[c].length)
-    .sort((x, y) => x.localeCompare(y, undefined, { numeric: true }));
-
-  const totalSlots = courts.reduce((sum, c) => sum + a[c].length, 0);
-  const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
-
-  let h = `<div class="card">`;
-  h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${totalSlots ? "ok" : "mut"}">${totalSlots} Slot${totalSlots === 1 ? "" : "s"}</div></div>`;
-  h += venueMetaHtml(v);
-
-  if (!courts.length) {
-    h += '<div class="mut">No open slots found.</div>';
-  }
-
-  for (const c of courts) {
-    h += `
+// One court's row of bookable times.
+function courtHtml(v, c, times, urls) {
+  return `
       <div class="court">
         <a class="book" href="${esc(bookUrl(v))}" target="_blank" rel="noopener">
           <b>${esc(c)}</b> ↗
         </a>
-        <span class="mut">(${a[c].length})</span>
+        <span class="mut">(${times.length})</span>
         <div class="times">
-          ${a[c].map(t => {
+          ${times.map(t => {
             const href = (urls && urls[c] && urls[c][t]) || bookUrl(v);
             return `<a class="t" href="${esc(href)}" target="_blank" rel="noopener" title="Book ${esc(t)}">${esc(t)}</a>`;
           }).join("")}
         </div>
       </div>
-    `;
+  `;
+}
+
+// Earliest slot time across every day collected for a venue (Infinity if none).
+function venueEarliest(entries) {
+  let best = Infinity;
+  for (const e of entries) if (e.a) best = Math.min(best, earliestTime(e.a));
+  return best;
+}
+
+// One card per venue: contact details shown once, then availability grouped by
+// day. `entries` is an array of { iso, a, urls } and/or { iso, error } in date order.
+function renderVenueMultiDay(v, entries, after, before, multiDay) {
+  let total = 0;
+  for (const e of entries) {
+    if (e.a) for (const c in e.a) total += e.a[c].length;
+  }
+
+  const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
+
+  let h = `<div class="card">`;
+  h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${total ? "ok" : "mut"}">${total} Slot${total === 1 ? "" : "s"}</div></div>`;
+  h += venueMetaHtml(v);
+
+  let rendered = false;
+
+  for (const e of entries) {
+    if (e.error) {
+      if (multiDay) h += `<div class="court-day">${esc(dayLabel(e.iso))}</div>`;
+      h += `<div class="mut err">Load failed. ${esc(e.error)}.</div>`;
+      rendered = true;
+      continue;
+    }
+
+    const courts = Object.keys(e.a)
+      .filter(c => e.a[c].length)
+      .sort((x, y) => x.localeCompare(y, undefined, { numeric: true }));
+
+    // With multiple days, skip days that have nothing so the card stays compact.
+    if (!courts.length) {
+      if (!multiDay) h += '<div class="mut">No open slots found.</div>';
+      continue;
+    }
+
+    if (multiDay) {
+      const dayTotal = courts.reduce((sum, c) => sum + e.a[c].length, 0);
+      h += `<div class="court-day">${esc(dayLabel(e.iso))}<span class="cd-count">${dayTotal} slot${dayTotal === 1 ? "" : "s"}</span></div>`;
+    }
+
+    for (const c of courts) h += courtHtml(v, c, e.a[c], e.urls);
+    rendered = true;
+  }
+
+  if (!rendered && multiDay) {
+    h += '<div class="mut">No open slots found on any of the selected days.</div>';
   }
 
   h += "</div>";
@@ -1203,13 +1303,56 @@ document.getElementById("clearAll").onclick = () => {
   updatePreview();
 };
 
+// Fetch every venue for one day and return { ok, fail } plus the day's total slot count.
+async function checkAllVenues(venues, ymd, slot, after, before) {
+  const results = await Promise.allSettled(
+    venues.map(async v => {
+      const { slots, urls } = await checkVenue(v, ymd, slot);
+      let a = slots;
+
+      if (after || before) {
+        const f = {};
+        for (const c in a) {
+          f[c] = a[c].filter(t => withinWindow(t, slot, after, before));
+        }
+        a = f;
+      }
+
+      return { v, a, urls };
+    })
+  );
+
+  const ok = [];
+  const fail = [];
+
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+
+    if (r.status === "fulfilled") {
+      ok.push(r.value);
+    } else {
+      fail.push({
+        v: venues[i],
+        error: r.reason && r.reason.message ? r.reason.message : "Load failed"
+      });
+    }
+  }
+
+  ok.sort((x, y) => earliestTime(x.a) - earliestTime(y.a) || x.v.localeCompare(y.v));
+
+  const total = ok.reduce((sum, item) =>
+    sum + Object.values(item.a).reduce((s, arr) => s + arr.length, 0), 0);
+
+  return { ok, fail, total };
+}
+
 document.getElementById("go").onclick = async () => {
   const out = document.getElementById("out");
   const button = document.getElementById("go");
 
   const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
-  const ymd = document.getElementById("date").value.replace(/-/g, "");
   const slot = +document.getElementById("slot").value;
+  const days = +document.getElementById("days").value || 1;
   const after = document.getElementById("after").value;
   const before = document.getElementById("before").value;
 
@@ -1233,64 +1376,61 @@ document.getElementById("go").onclick = async () => {
     return;
   }
 
+  // Build the list of days to check, starting from the chosen date.
+  const dates = [];
+  for (let i = 0; i < days; i++) dates.push(addDaysISO(chosen, i));
+
   button.disabled = true;
   button.textContent = "Checking...";
 
+  const multiDay = days > 1;
+  const dayWord = multiDay ? ` across ${days} days` : "";
   out.innerHTML = `
-    <div class="card status">
+    <div class="card status" id="status">
       <div class="spinner"></div>
-      <div class="mut">Checking availability for ${venues.length} venue${venues.length === 1 ? "" : "s"}...</div>
+      <div class="mut">Checking availability for ${venues.length} venue${venues.length === 1 ? "" : "s"}${dayWord}...</div>
     </div>
   `;
 
+  // Collect each venue's per-day results so a venue's contact details render
+  // once, with availability listed day-by-day underneath — no duplication.
+  const venueDays = {};
+  for (const v of venues) venueDays[v] = [];
+
+  function repaint(stillLoading) {
+    const ordered = [...venues].sort((x, y) =>
+      venueEarliest(venueDays[x]) - venueEarliest(venueDays[y]) || x.localeCompare(y));
+
+    const cards = ordered
+      .filter(v => venueDays[v].length)
+      .map(v => renderVenueMultiDay(v, venueDays[v], after, before, multiDay))
+      .join("");
+
+    const spinner = stillLoading
+      ? `<div class="card status"><div class="spinner"></div><div class="mut">Loading${multiDay ? " remaining days" : ""}...</div></div>`
+      : "";
+
+    out.innerHTML = (cards || (stillLoading ? "" : '<div class="card mut">No results found.</div>')) + spinner;
+  }
+
   try {
-    const results = await Promise.allSettled(
-      venues.map(async v => {
-        const { slots, urls } = await checkVenue(v, ymd, slot);
-        let a = slots;
+    for (let di = 0; di < dates.length; di++) {
+      const iso = dates[di];
+      const ymd = iso.replace(/-/g, "");
+      const { ok, fail } = await checkAllVenues(venues, ymd, slot, after, before);
 
-        if (after || before) {
-          const f = {};
-          for (const c in a) {
-            f[c] = a[c].filter(t => withinWindow(t, slot, after, before));
-          }
-          a = f;
-        }
+      const okMap = {};
+      ok.forEach(o => okMap[o.v] = o);
+      const failMap = {};
+      fail.forEach(f => failMap[f.v] = f);
 
-        return { v, a, urls };
-      })
-    );
-
-    const ok = [];
-    const fail = [];
-
-    for (let i = 0; i < results.length; i++) {
-      const r = results[i];
-
-      if (r.status === "fulfilled") {
-        ok.push(r.value);
-      } else {
-        fail.push({
-          v: venues[i],
-          error: r.reason && r.reason.message ? r.reason.message : "Load failed"
-        });
+      for (const v of venues) {
+        if (okMap[v]) venueDays[v].push({ iso, a: okMap[v].a, urls: okMap[v].urls });
+        else if (failMap[v]) venueDays[v].push({ iso, error: failMap[v].error });
       }
+
+      repaint(di < dates.length - 1);
     }
-
-    ok.sort((x, y) => earliestTime(x.a) - earliestTime(y.a) || x.v.localeCompare(y.v));
-
-    const blocks = [];
-
-    for (const item of ok) {
-      blocks.push(renderVenueResult(item.v, item.a, item.urls, after, before));
-    }
-
-    for (const item of fail) {
-      blocks.push(`<div class="card err">${esc(item.v)}: Load failed. ${esc(item.error)}.</div>`);
-    }
-
-    out.innerHTML = blocks.join("") || '<div class="card mut">No results found.</div>';
-
   } finally {
     button.disabled = false;
     button.textContent = "Check Availability";
