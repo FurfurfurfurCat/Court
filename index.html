@@ -59,7 +59,9 @@ h1 {
   margin-bottom:16px;
 }
 
-label {
+label,
+.section-label,
+.field-label {
   display:block;
   font-size:13px;
   color:var(--mut);
@@ -67,7 +69,7 @@ label {
   font-weight:800;
 }
 
-select, input, button {
+select, input, textarea, button {
   width:100%;
   padding:12px;
   font-size:16px;
@@ -77,7 +79,7 @@ select, input, button {
   color:var(--txt);
 }
 
-input:focus, select:focus {
+input:focus, select:focus, textarea:focus {
   outline:none;
   border-color:var(--acc);
   box-shadow:0 0 0 3px rgba(236,72,153,.08);
@@ -95,6 +97,12 @@ button {
 button:disabled {
   opacity:.65;
   cursor:not-allowed;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline:3px solid rgba(236,72,153,.35);
+  outline-offset:3px;
 }
 
 button.secondary {
@@ -311,9 +319,75 @@ a.t:active {
   margin-bottom:10px;
 }
 
+.wx-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.wx-head .wx-title {
+  margin-bottom:0;
+}
+
+.wx-toggle {
+  display:inline-flex;
+  gap:2px;
+  flex:0 0 auto;
+  background:#fce7f3;
+  border:1px solid var(--line-soft);
+  border-radius:999px;
+  padding:2px;
+}
+
+.wx-opt {
+  width:auto;
+  margin:0;
+  border:0;
+  background:transparent;
+  font-size:12px;
+  font-weight:800;
+  color:var(--acc2);
+  padding:4px 10px;
+  border-radius:999px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.wx-opt.active {
+  background:#fff;
+  color:#831843;
+}
+
+.sr-only {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0, 0, 0, 0);
+  white-space:nowrap;
+  border:0;
+}
+
+.wx-legend {
+  font-size:11px;
+  color:var(--mut);
+  margin-bottom:10px;
+}
+
+.wx-legend b {
+  color:#2563eb;
+}
+
+/* Column count is set inline per render (see renderWeatherStrip) so the day
+   count divides into even rows. auto-fit used to leave the 12th chip orphaned
+   on a row of its own whenever only 11 happened to fit. */
 .wx-row {
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(64px, 1fr));
+  grid-template-columns:repeat(var(--wx-cols, 7), minmax(0, 1fr));
   gap:8px;
 }
 
@@ -366,7 +440,7 @@ a.t:active {
 @media (max-width:640px) {
   .wx-strip { padding:12px 12px; }
   .wx-row {
-    grid-template-columns:repeat(auto-fit, minmax(54px, 1fr));
+    grid-template-columns:repeat(var(--wx-cols-sm, 7), minmax(0, 1fr));
     gap:6px;
   }
   .wx { padding:7px 3px; border-radius:12px; }
@@ -385,6 +459,144 @@ a.t:active {
 .ok {
   color:var(--success);
   font-weight:700;
+}
+
+/* Neutral advisory (e.g. a venue that blocks automated checks) — not an error. */
+.note {
+  display:grid;
+  grid-template-columns:20px 1fr;
+  gap:9px 10px;
+  align-items:start;
+  padding:12px 15px;
+  background:#fffbeb;
+  border:1px solid #fde68a;
+  border-radius:16px;
+  font-size:13px;
+  line-height:1.45;
+  color:#78350f;
+}
+
+.note .mi {
+  text-align:center;
+}
+
+.note a {
+  color:#b45309;
+  font-weight:800;
+}
+
+.note .manual-link {
+  display:inline-block;
+  margin-top:8px;
+  padding:8px 12px;
+  background:#fff;
+  border:1px solid #fcd34d;
+  border-radius:12px;
+  text-decoration:none;
+}
+
+.note .manual-link:hover {
+  background:#fffbeb;
+  text-decoration:underline;
+}
+
+.capture-panel summary {
+  cursor:pointer;
+  font-weight:900;
+  color:var(--acc2);
+}
+
+.capture-panel[open] summary {
+  margin-bottom:12px;
+}
+
+.capture-steps {
+  margin:10px 0 14px;
+  padding-left:22px;
+  color:var(--txt);
+  font-size:14px;
+  line-height:1.55;
+}
+
+.capture-bookmarklet {
+  display:inline-block;
+  padding:9px 14px;
+  margin:4px 0;
+  color:#fff;
+  background:var(--acc);
+  border-radius:14px;
+  font-weight:900;
+  text-decoration:none;
+}
+
+.capture-bookmarklet:hover {
+  background:var(--acc2);
+}
+
+.capture-copy {
+  width:auto;
+  margin:4px 0 4px 8px;
+  padding:9px 14px;
+}
+
+.capture-panel textarea {
+  min-height:120px;
+  resize:vertical;
+  font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+
+.capture-status {
+  margin-top:10px;
+  min-height:20px;
+}
+
+.capture-batch {
+  border-color:#f2bfd5;
+  background:linear-gradient(135deg,#fff 0%,#fff4f8 100%);
+}
+
+.capture-batch h2 {
+  margin:0 0 6px;
+  font-size:20px;
+}
+
+.capture-batch-actions {
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.capture-batch-actions button {
+  margin:0;
+}
+
+.capture-batch-actions .secondary {
+  width:auto;
+}
+
+.capture-batch-status {
+  margin-top:10px;
+  min-height:20px;
+}
+
+.capture-saved {
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--card-soft);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.capture-source {
+  margin:0 0 12px;
+  padding:9px 12px;
+  color:#075985;
+  background:#f0f9ff;
+  border:1px solid #bae6fd;
+  border-radius:14px;
+  font-size:13px;
 }
 
 .status {
@@ -451,7 +663,7 @@ select {
 }
 
 .form-grid label,
-.form-grid label.field-label {
+.form-grid .field-label {
   min-height:18px;
   line-height:18px;
 }
@@ -524,8 +736,10 @@ button.secondary {
   .venue-top { align-items:flex-start; flex-direction:column; }
   .actions { width:100%; }
   .actions button.secondary { flex:1; }
-  button { position:sticky; bottom:12px; z-index:5; }
+  button { position:static; }
   button.secondary { position:static; }
+  .capture-batch-actions { flex-direction:column; }
+  .capture-batch-actions .secondary { width:100%; }
 }
 
 /* Consistent control style fix */
@@ -662,8 +876,16 @@ body.hide-empty .venue-empty {
   pointer-events:none;
 }
 
-#cats { z-index:-1; }         /* behind the cards */
-#cats-front { z-index:9999; } /* drifting over the content */
+#cats,
+#cats-front { z-index:0; }
+
+body > h1,
+body > .subtitle,
+body > .card,
+body > #out {
+  position:relative;
+  z-index:1;
+}
 
 .cat {
   position:absolute;
@@ -701,22 +923,22 @@ body.hide-empty .venue-empty {
 <div class="subtitle">Check available tennis court slots across selected venues.</div>
 
 <div class="card">
-  <label>Venues</label>
+  <div class="section-label" id="venues-label">Venues</div>
   <div class="actions">
     <button class="secondary" id="selectAll" type="button">Select All</button>
     <button class="secondary" id="clearAll" type="button">Clear All</button>
   </div>
 
-  <div class="venues" id="venues"></div>
+  <div class="venues" id="venues" role="group" aria-labelledby="venues-label"></div>
 
   <div class="form-grid">
     <div class="field">
-      <label>Date</label>
+      <label for="date">Date</label>
       <input type="date" id="date">
     </div>
 
     <div class="field">
-      <label>Slot Size</label>
+      <label for="slot">Slot Size</label>
       <select id="slot">
         <option value="30">30 Minutes</option>
         <option value="60" selected>1 Hour</option>
@@ -726,7 +948,7 @@ body.hide-empty .venue-empty {
     </div>
 
     <div class="field">
-      <label>From Optional</label>
+      <label for="after">From Optional</label>
       <select id="after">
         <option value="">Any Time</option>
         <option value="06:00">6:00 AM</option>
@@ -767,7 +989,7 @@ body.hide-empty .venue-empty {
     </div>
 
     <div class="field">
-      <label>To Optional</label>
+      <label for="before">To Optional</label>
       <select id="before">
         <option value="">Any Time</option>
         <option value="06:00">6:00 AM</option>
@@ -808,7 +1030,7 @@ body.hide-empty .venue-empty {
     </div>
 
     <div class="field">
-      <label>Days</label>
+      <label for="days">Days</label>
       <select id="days">
         <option value="1" selected>Just this day</option>
         <option value="2">Next 2 days</option>
@@ -820,7 +1042,7 @@ body.hide-empty .venue-empty {
     </div>
 
     <div class="field">
-      <label>Results</label>
+      <div class="field-label">Results</div>
       <label class="toggle" for="hideEmpty">
         <input type="checkbox" id="hideEmpty">
         <span>Hide venues with no slots</span>
@@ -829,9 +1051,47 @@ body.hide-empty .venue-empty {
   </div>
 
   <button id="go" type="button">Check Availability</button>
+
 </div>
 
+<section class="card capture-batch" aria-labelledby="captureBatchHeading">
+  <h2 id="captureBatchHeading">Capture all Tennis Venues</h2>
+  <div class="mut">One Safari run checks all 6 locations for 7 days, starting from your selected date. Keep Safari open while it works through 42 official pages.</div>
+  <div class="mut"><b>Existing users:</b> open <a href="court-capture.user.js">Court Capture for Safari v1.1</a> and approve the update once before starting.</div>
+  <div class="capture-batch-actions">
+    <button id="captureSevenDays" type="button">Capture all 6 venues · 7 days</button>
+    <button class="secondary" id="stopCaptureBatch" type="button" hidden>Stop capture</button>
+  </div>
+  <div class="capture-batch-status mut" id="captureBatchStatus" role="status" aria-live="polite"></div>
+</section>
+
+<details class="card capture-panel" id="captureTools">
+  <summary>Safari setup for Tennis Venues</summary>
+  <div class="mut">Set this up once on your iPhone. It reads only the times displayed in your logged-in Safari page; it does not copy your password or cookies.</div>
+  <ol class="capture-steps">
+    <li>Install the free <a class="manual-link" href="https://apps.apple.com/au/app/userscripts/id1463298887" target="_blank" rel="noopener">Userscripts Safari extension ↗</a>.</li>
+    <li>On iPhone, enable it in <b>Settings → Apps → Safari → Extensions</b>.</li>
+    <li>Open <a class="manual-link" href="court-capture.user.js">Court Capture for Safari</a>, open the Userscripts extension menu, and approve the installation.</li>
+    <li>Allow Userscripts on <b>tennisvenues.com.au</b>, then sign in there once.</li>
+    <li>Use <b>Capture this date in Safari</b> on a result card. The official page will return the times automatically.</li>
+  </ol>
+  <div class="mut">Safari will move between the official page and Court Search while it captures. Keep Safari open until the progress reaches 42 of 42.</div>
+  <hr>
+  <div class="mut"><b>Manual fallback</b> for a browser without the userscript:</div>
+  <ol class="capture-steps">
+    <li>Drag <a class="capture-bookmarklet" id="captureBookmarklet" href="#">Court Capture</a> to the bookmarks bar.</li>
+    <li>Open the official date, run the bookmark, then paste the result below.</li>
+  </ol>
+  <button class="secondary capture-copy" id="copyBookmarklet" type="button">Copy manual bookmarklet address</button>
+  <label for="captureInput">Captured availability</label>
+  <textarea id="captureInput" spellcheck="false" placeholder="Paste the Court Capture data here"></textarea>
+  <button id="importCapture" type="button">Import captured times</button>
+  <div class="capture-status mut" id="captureStatus" role="status" aria-live="polite"></div>
+  <div id="captureSaved"></div>
+</details>
+
 <div id="out"></div>
+<div id="searchStatus" class="sr-only" role="status" aria-live="polite"></div>
 
 <script>
 // Proxy setting.
@@ -840,6 +1100,10 @@ body.hide-empty .venue-empty {
 // You can temporarily fall back to "https://corsproxy.io/?url=" but POST-based
 // venues (Pennant Hills / Beecroft / Cowells Lane) will not work through it.
 const PROXY = "https://court-proxy.t5nd2ckjrm.workers.dev/?url=";
+
+// SportLogic host behind the six tennisvenues venues. Never fetched by this
+// page: it disallows automated reads, so those venues link out instead.
+const SL_HOST = "https://www.tennisvenues.com.au";
 
 const VENUES = {
   "Marsfield":"etdta-abuklea-rd-marsfield",
@@ -929,8 +1193,13 @@ function dayLabel(iso) {
   return d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" });
 }
 
-function bookUrl(v) {
-  if (v in VENUES) return `https://www.tennisvenues.com.au/booking/${VENUES[v]}`;
+function bookUrl(v, iso = "") {
+  if (v in VENUES) {
+    const base = `https://www.tennisvenues.com.au/booking/${VENUES[v]}`;
+    return /^\d{4}-\d{2}-\d{2}$/.test(iso)
+      ? `${base}/timeslot?date=${iso.replace(/-/g, "")}`
+      : base;
+  }
   if (v in BCS) return BCS[v][0] + BCS_PATH;
   return `https://krg.bookable.net.au/venues/${KRG[v]}/`;
 }
@@ -955,10 +1224,42 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
   }
 }
 
-async function getText(u) {
-  const r = await fetchWithTimeout(prox(u));
+// --- Bot protection -------------------------------------------------------
+// tennisvenues.com.au (SportLogic) now serves an AWS WAF JavaScript challenge
+// for /booking/*, and its robots.txt disallows /booking/*/fetch-booking-data.
+// The challenge answers with "202 + empty body" to any non-browser client, so
+// without this check the page would read that as an empty court list and
+// wrongly blame a site redesign. A CORS proxy cannot answer a JS challenge, so
+// these venues are treated as "check manually" rather than retried forever.
+class BlockedError extends Error {
+  constructor(msg = "This venue blocks automated availability checks") {
+    super(msg);
+    this.name = "BlockedError";
+    this.blocked = true;
+  }
+}
+
+const WAF_MARKERS = /awswaf|AwsWafIntegration|challenge-container|gokuProps/i;
+
+function isChallenge(r, body) {
+  // The worker relays the upstream's Access-Control-Expose-Headers, so this
+  // header is usually readable — but don't rely on it alone.
+  if (r.headers.get("x-amzn-waf-action")) return true;
+  if (r.status === 202 && !(body || "").trim()) return true;
+  return WAF_MARKERS.test(body || "");
+}
+
+// Single place where a proxied response becomes text, so every venue backend
+// gets the same challenge / HTTP-error handling.
+async function readBody(r) {
+  const body = await r.text().catch(() => "");
+  if (isChallenge(r, body)) throw new BlockedError();
   if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.text();
+  return body;
+}
+
+async function getText(u) {
+  return readBody(await fetchWithTimeout(prox(u)));
 }
 
 async function getJSON(u) {
@@ -974,8 +1275,7 @@ async function postText(u, dataObj) {
     body
   });
 
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.text();
+  return readBody(r);
 }
 
 function hm(s) {
@@ -1063,43 +1363,239 @@ function earliestTime(result) {
   return best;
 }
 
-async function sportlogic(key, ymd, slot) {
-  const cid = VENUES[key];
-  const url = `https://www.tennisvenues.com.au/booking/${cid}/fetch-booking-data?client_id=${cid}&venue_id=1&resource_id=&date=${ymd}&view=v4`;
+// --- User-assisted Tennis Venues capture ---------------------------------
+// The official page is opened normally in the user's browser. This bookmarklet
+// reads only the availability links already rendered on that page and copies a
+// small JSON payload for import here; it never reads or transports cookies.
+const CAPTURES_KEY = "courtCaptures.v1";
+const CAPTURE_BATCH_KEY = "courtCaptureBatch.v1";
+const CAPTURE_TOKEN_KEY = "courtCaptureToken.v1";
 
-  const html = await getText(url);
+function newCaptureToken() {
+  return (globalThis.crypto && typeof crypto.randomUUID === "function")
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+let CAPTURE_SESSION_TOKEN;
+try {
+  CAPTURE_SESSION_TOKEN = sessionStorage.getItem(CAPTURE_TOKEN_KEY) || newCaptureToken();
+  sessionStorage.setItem(CAPTURE_TOKEN_KEY, CAPTURE_SESSION_TOKEN);
+} catch (e) {
+  CAPTURE_SESSION_TOKEN = newCaptureToken();
+}
+
+function courtSearchReturnUrl() {
+  const url = new URL(location.href);
+  url.hash = "";
+  return url.href;
+}
+
+function autoCaptureUrl(v, iso, token = CAPTURE_SESSION_TOKEN) {
+  const url = new URL(bookUrl(v, iso));
+  url.hash = new URLSearchParams({
+    courtSearchCapture: token,
+    courtSearchReturn: courtSearchReturnUrl()
+  }).toString();
+  return url.href;
+}
+
+function sportLogicCaptureRunner(testOnly = false) {
+  const links = [...document.querySelectorAll("a.v3-slot-btn[href*='/booking/request']")];
+  const courts = {};
+  const pathMatch = location.pathname.match(/^\/booking\/([^/]+)\/timeslot\/?$/);
+  let venueSlug = pathMatch?.[1] || "";
+  let date = new URL(location.href).searchParams.get("date") || "";
+
+  for (const button of document.querySelectorAll(".v3-court-btn[id^='v3_court_btn_']:not(.v3-court-more)")) {
+    const name = button.textContent.replace(/\s+/g, " ").trim();
+    if (name) courts[name] = [];
+  }
+
+  for (const link of links) {
+    const url = new URL(link.href, location.href);
+    const slug = url.searchParams.get("v") || "";
+    const courtId = url.searchParams.get("id") || "";
+    const ymd = url.searchParams.get("d") || "";
+    const rawTime = (url.searchParams.get("t") || "").padStart(4, "0");
+
+    if (!slug || !courtId || !/^\d{8}$/.test(ymd) || !/^\d{4}$/.test(rawTime)) continue;
+    if (venueSlug && slug !== venueSlug) continue;
+    if (date && ymd !== date) continue;
+
+    venueSlug = slug;
+    date = ymd;
+
+    const courtButton = document.getElementById("v3_court_btn_" + courtId);
+    const courtName = (courtButton?.textContent || courtId).replace(/\s+/g, " ").trim();
+    const time = rawTime.slice(0, 2) + ":" + rawTime.slice(2);
+    const item = { time, url: url.href };
+
+    if (!courts[courtName]) courts[courtName] = [];
+    if (!courts[courtName].some(existing => existing.time === time)) courts[courtName].push(item);
+  }
+
+  for (const entries of Object.values(courts)) entries.sort((a, b) => a.time.localeCompare(b.time));
+
+  const count = Object.values(courts).reduce((sum, entries) => sum + entries.length, 0);
+  if (!venueSlug || !/^\d{8}$/.test(date) || !Object.keys(courts).length) {
+    alert("Open a Tennis Venues timeslot page before using Court Capture.");
+    return;
+  }
+
+  const venueName = (document.querySelector(".booking-topbar-venue-name a")?.textContent || document.title)
+    .replace(/\s+/g, " ").trim();
+  const payload = JSON.stringify({
+    version: 1,
+    source: "tennisvenues.com.au",
+    venueSlug,
+    venueName,
+    date,
+    capturedAt: new Date().toISOString(),
+    pageUrl: location.href,
+    courts
+  });
+
+  if (testOnly) return payload;
+
+  const fallback = () => window.prompt("Copy this Court Capture data, then paste it into Court Search:", payload);
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(payload)
+      .then(() => alert(`Copied ${count} visible time${count === 1 ? "" : "s"}. Return to Court Search and paste to import.`))
+      .catch(fallback);
+  } else {
+    fallback();
+  }
+}
+
+function captureBookmarkletHref() {
+  return "javascript:(" + sportLogicCaptureRunner.toString() + ")()";
+}
+
+function loadCapturedData() {
+  try {
+    const value = JSON.parse(localStorage.getItem(CAPTURES_KEY) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function captureStoreKey(slug, ymd) {
+  return `${slug}|${ymd}`;
+}
+
+function normaliseCapture(raw) {
+  let value;
+  try {
+    value = JSON.parse(raw);
+  } catch (e) {
+    throw new Error("That capture is not valid JSON.");
+  }
+
+  if (!value || value.version !== 1 || value.source !== "tennisvenues.com.au") {
+    throw new Error("That is not Court Capture data.");
+  }
+
+  const venue = Object.keys(VENUES).find(v => VENUES[v] === value.venueSlug);
+  if (!venue) throw new Error("This Tennis Venues location is not in Court Search.");
+  if (!/^\d{8}$/.test(value.date || "")) throw new Error("The capture date is invalid.");
+  if (!value.courts || typeof value.courts !== "object") throw new Error("No courts were found in the capture.");
+
+  let pageUrl;
+  try {
+    pageUrl = new URL(String(value.pageUrl || ""));
+  } catch (e) {
+    throw new Error("The official page address is missing from the capture.");
+  }
+  if (pageUrl.protocol !== "https:" || pageUrl.hostname !== "www.tennisvenues.com.au" ||
+      pageUrl.pathname.replace(/\/$/, "") !== `/booking/${value.venueSlug}/timeslot` ||
+      pageUrl.searchParams.get("date") !== value.date) {
+    throw new Error("The capture does not match an official timeslot page.");
+  }
 
   const courts = {};
-  let m;
+  let count = 0;
 
-  const reH = /data-court-index='(\d+)'>([^<]*)<\/th>/g;
-  while ((m = reH.exec(html))) courts[m[1]] = m[2];
+  for (const [rawName, rawEntries] of Object.entries(value.courts)) {
+    const name = String(rawName).replace(/\s+/g, " ").trim().slice(0, 120);
+    if (!name || !Array.isArray(rawEntries)) continue;
 
-  if (!Object.keys(courts).length) {
-    throw new Error("Could not read court list (site layout may have changed)");
+    const byTime = new Map();
+    for (const item of rawEntries) {
+      const time = String(item?.time || "");
+      if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) continue;
+
+      let url;
+      const courtId = String(item?.courtId || "");
+      if (courtId && /^[A-Za-z0-9_-]{1,50}$/.test(courtId)) {
+        url = new URL("/booking/request", SL_HOST);
+        url.search = new URLSearchParams({
+          v: value.venueSlug,
+          id: courtId,
+          d: value.date,
+          t: time.replace(":", ""),
+          cm: "false"
+        }).toString();
+      } else {
+        try {
+          url = new URL(String(item?.url || ""));
+        } catch (e) {
+          continue;
+        }
+      }
+
+      const rawTime = (url.searchParams.get("t") || "").padStart(4, "0");
+      if (url.protocol !== "https:" || url.hostname !== "www.tennisvenues.com.au" ||
+          url.pathname !== "/booking/request" || url.searchParams.get("v") !== value.venueSlug ||
+          url.searchParams.get("d") !== value.date || `${rawTime.slice(0,2)}:${rawTime.slice(2)}` !== time) {
+        continue;
+      }
+
+      byTime.set(time, { time, url: url.href });
+    }
+
+    const entries = [...byTime.values()].sort((a, b) => a.time.localeCompare(b.time));
+    courts[name] = entries;
+    count += entries.length;
   }
 
-  const sets = {};
-  const urls = {};
-  const base = `https://www.tennisvenues.com.au/booking/${cid}/`;
-  const reA = /v4-slot-available'\s+data-court-index='(\d+)'>\s*<a href='([^']*)'/g;
+  if (!Object.keys(courts).length) throw new Error("No valid courts were found in the capture.");
 
-  while ((m = reA.exec(html))) {
-    const name = courts[m[1]] || m[1];
-    const href = m[2];
-    const tm = href.match(/[?&]t=(\d+)/);
-    if (!tm) continue;
+  return {
+    venue,
+    slug: value.venueSlug,
+    ymd: value.date,
+    iso: `${value.date.slice(0,4)}-${value.date.slice(4,6)}-${value.date.slice(6,8)}`,
+    capturedAt: new Date().toISOString(),
+    courts,
+    count
+  };
+}
 
-    const t = tm[1].padStart(4, "0");
-    const time = t.slice(0,2) + ":" + t.slice(2);
-
-    (sets[name] = sets[name] || new Set()).add(time);
-    (urls[name] = urls[name] || {})[time] = new URL(href.replace(/&amp;/g, "&"), base).href;
-  }
+function capturedVenueResult(v, ymd, slot) {
+  const capture = loadCapturedData()[captureStoreKey(VENUES[v], ymd)];
+  if (!capture) return null;
 
   const slots = {};
-  for (const name in sets) slots[name] = aggregate([...sets[name]].sort(), slot);
-  return { slots, urls };
+  const urls = {};
+
+  for (const [court, entries] of Object.entries(capture.courts || {})) {
+    const rawTimes = entries.map(item => item.time).sort();
+    slots[court] = aggregate(rawTimes, slot);
+    urls[court] = {};
+    for (const time of slots[court]) {
+      const item = entries.find(entry => entry.time === time);
+      if (item) urls[court][time] = item.url;
+    }
+  }
+
+  return { slots, urls, capturedAt: capture.capturedAt };
+}
+
+function captureTimeLabel(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "recently" : date.toLocaleString();
 }
 
 async function krg(key, ymd, slot) {
@@ -1133,7 +1629,7 @@ async function krg(key, ymd, slot) {
   }
 
   const ids = courts.map(c => c[0]);
-  if (!ids.length) return {};
+  if (!ids.length) return { slots: {}, urls: {} };
 
   const bk = await getJSON(
     `https://krg.bookable.net.au/api/v2/bookingbookablesinperiodandbookableids?bookableIdsStr=${ids.join(",")}&fromDate=${iso}T00:00:00&toDate=${iso}T23:59:59&hideCancelledBooking=true&selectedDatesStr=&hideClosure=true&hideWorkBooking=true`
@@ -1301,11 +1797,16 @@ async function bcs(key, ymd, slot) {
 
 async function checkVenue(v, ymd, slot) {
   let res;
-  if (v in VENUES) res = await sportlogic(v, ymd, slot);
+  // Tennis Venues is never fetched here. If the user imported a capture from
+  // its visible official page, use it; otherwise show the manual capture flow.
+  if (v in VENUES) {
+    res = capturedVenueResult(v, ymd, slot);
+    if (!res) throw new BlockedError("No imported capture for this date");
+  }
   else if (v in BCS) res = await bcs(v, ymd, slot);
   else res = await krg(v, ymd, slot);
 
-  const { slots, urls } = res;
+  const { slots, urls, capturedAt = null } = res;
   const hide = HIDE_COURTS[v];
   if (hide) {
     for (const c in slots) {
@@ -1316,7 +1817,7 @@ async function checkVenue(v, ymd, slot) {
     }
   }
 
-  return { slots, urls };
+  return { slots, urls, capturedAt };
 }
 
 // --- Request throttling ---------------------------------------------------
@@ -1344,18 +1845,29 @@ function runLimited(fn) {
 }
 
 // --- Result cache ---------------------------------------------------------
-// Cache each (venue, day, slot-size) lookup for the session so re-running,
-// changing the time window, or overlapping day ranges reuse fetched data
-// instead of hitting the network again. Failures are NOT cached, so a retry
-// (re-clicking "Check Availability") will attempt failed venues again.
+// Scoped to a single "Check Availability" run, NOT the session: pressing the
+// button always goes back to the network, because court availability changes
+// minute to minute and showing a cached answer for a fresh check is wrong.
+// Within one run the cache still does real work — a 14-day range asks for the
+// same (venue, day, slot-size) more than once and only fetches it once.
+// Failures are never cached, so failed venues get retried on the next run.
 const venueCache = new Map();
 
+// Venues that answered with a bot challenge, remembered for the current run
+// only: a 14-day range would otherwise fire 14 pointless requests at a site
+// that already said no. Cleared on each new check, so refreshing your
+// tennisvenues session and clicking again retries properly.
+const blockedVenues = new Map(); // venue -> the BlockedError it produced
+
 function cachedCheckVenue(v, ymd, slot) {
+  if (blockedVenues.has(v)) return Promise.reject(blockedVenues.get(v));
+
   const key = `${v}|${ymd}|${slot}`;
   if (venueCache.has(key)) return venueCache.get(key);
 
   const p = runLimited(() => checkVenue(v, ymd, slot)).catch(err => {
     venueCache.delete(key);
+    if (err && err.blocked) blockedVenues.set(v, err);
     throw err;
   });
 
@@ -1369,6 +1881,12 @@ function cachedCheckVenue(v, ymd, slot) {
 // daily forecast (reusing the KRG coordinates) covers every venue.
 const weatherCache = new Map(); // iso date -> { code, tmax, tmin, precip }
 let weatherPromise = null;
+
+// How many days the weather strip shows, and the date it starts from.
+// The toggle in the strip lets you switch between 7 / 12 / 16 days.
+const WX_DAY_OPTIONS = [7, 12, 16];
+let wxDays = 12;
+let wxStart = null;
 
 function ensureWeather() {
   if (!weatherPromise) {
@@ -1431,8 +1949,31 @@ function wxInline(iso) {
   return `<span class="cd-wx" title="${esc(desc)}">${emoji} ${Math.round(w.tmax)}°${rain}</span>`;
 }
 
-// A horizontal strip of per-day weather chips for the requested dates.
-function renderWeatherStrip(dates) {
+// Switch the weather strip between 7 / 12 / 16 days without a refetch —
+// the forecast data is already cached, so we just re-render the strip.
+function setWxDays(n) {
+  wxDays = n;
+  savePrefs();
+  const el = document.querySelector(".wx-strip");
+  if (el) el.outerHTML = renderWeatherStrip();
+}
+
+// Chips per row, chosen so the day count divides into even rows rather than
+// leaving a single orphan on the last line: 12 days -> one row of 12 on
+// desktop, two rows of 6 on a phone; 16 -> two rows of 8 / three rows of 6.
+function wxCols(n, maxPerRow) {
+  const rows = Math.ceil(n / maxPerRow);
+  return Math.ceil(n / rows);
+}
+
+// The weather strip: a header (title + day-count toggle), a legend, and a
+// responsive grid of per-day chips built from wxStart over wxDays.
+function renderWeatherStrip() {
+  const start = wxStart || localDateISO();
+
+  const dates = [];
+  for (let i = 0; i < wxDays; i++) dates.push(addDaysISO(start, i));
+
   if (!dates.some(iso => weatherCache.has(iso))) return "";
 
   const chips = dates.map(iso => {
@@ -1455,9 +1996,17 @@ function renderWeatherStrip(dates) {
     </div>`;
   }).join("");
 
+  const toggle = WX_DAY_OPTIONS
+    .map(n => `<button type="button" class="wx-opt${n === wxDays ? " active" : ""}" onclick="setWxDays(${n})" aria-pressed="${n === wxDays}">${n}d</button>`)
+    .join("");
+
   return `<div class="card wx-strip">
-    <div class="wx-title">🌤️ 12-day weather · northern Sydney</div>
-    <div class="wx-row">${chips}</div>
+    <div class="wx-head">
+      <div class="wx-title">🌤️ Weather · northern Sydney</div>
+      <div class="wx-toggle">${toggle}</div>
+    </div>
+    <div class="wx-legend"><b>Blue</b> = rain likely (≥30% chance)</div>
+    <div class="wx-row" style="--wx-cols:${wxCols(dates.length, 12)};--wx-cols-sm:${wxCols(dates.length, 7)}">${chips}</div>
   </div>`;
 }
 
@@ -1500,6 +2049,17 @@ function courtHtml(v, c, times, urls) {
   `;
 }
 
+// These venues have unknown availability rather than zero, so the card links
+// out instead of implying we looked and found nothing.
+function blockedNoteHtml(v, iso = "") {
+  const dateText = iso ? ` for ${dayLabel(iso)}` : "";
+  return `<div class="note"><span class="mi">🔒</span><div>${esc(v)} doesn’t allow its open
+    times to be read by other sites.
+    <a class="manual-link auto-capture-link" href="${esc(autoCaptureUrl(v, iso))}">Capture this date in Safari${esc(dateText)} ↗</a>
+    <a href="#captureTools" onclick="document.getElementById('captureTools').open=true">Safari setup or manual import ↓</a>
+    </div></div>`;
+}
+
 // Earliest slot time across every day collected for a venue (Infinity if none).
 function venueEarliest(entries) {
   let best = Infinity;
@@ -1517,20 +2077,46 @@ function renderVenueMultiDay(v, entries, after, before, multiDay, loading) {
 
   const win = (after || before) ? ` [${after || ".."}-${before || ".."}]` : "";
 
+  // A venue that blocks automated checks has unknown availability, not zero —
+  // so it must not be marked empty, or "Hide venues with no slots" would imply
+  // we looked and found nothing.
+  const blocked = entries.length > 0 && entries.every(e => e.blocked);
+
   // Mark venues with no slots so the "Hide empty venues" toggle can drop them.
-  // Only once loading is done, so cards don't flicker away mid-check.
-  const emptyClass = (!loading && total === 0) ? " venue-empty" : "";
+  // Only once loading is done, so cards don't flicker away mid-check — and
+  // never for a venue we failed to read, since "we don't know" must not be
+  // presented as "we looked and there was nothing".
+  const anyError = entries.some(e => e.error);
+  const emptyClass = (!loading && total === 0 && !blocked && !anyError) ? " venue-empty" : "";
+
+  const count = blocked
+    ? `<div class="mut">Check manually</div>`
+    : `<div class="${total ? "ok" : "mut"}">${total} Slot${total === 1 ? "" : "s"}</div>`;
 
   let h = `<div class="card${emptyClass}">`;
-  h += `<div class="summary"><div class="head">${esc(v)}${esc(win)}</div><div class="${total ? "ok" : "mut"}">${total} Slot${total === 1 ? "" : "s"}</div></div>`;
+  h += `<div class="summary"><div class="head">${esc(v)}${esc(blocked ? "" : win)}</div>${count}</div>`;
   h += venueMetaHtml(v);
+
+  const capturedTimes = entries.filter(e => e.capturedAt).map(e => e.capturedAt).sort();
+  const captured = capturedTimes[capturedTimes.length - 1];
+  if (captured) {
+    h += `<div class="capture-source">Imported from the official page · captured ${esc(captureTimeLabel(captured))}. Re-capture when you need fresher availability.</div>`;
+  }
+
+  if (blocked) {
+    h += blockedNoteHtml(v, entries[0]?.iso || "");
+    h += "</div>";
+    return h;
+  }
 
   let rendered = false;
 
   for (const e of entries) {
     if (e.error) {
       if (multiDay) h += `<div class="court-day">${esc(dayLabel(e.iso))}</div>`;
-      h += `<div class="mut err">Load failed. ${esc(e.error)}.</div>`;
+      h += e.blocked
+        ? blockedNoteHtml(v, e.iso)
+        : `<div class="mut err">Load failed. ${esc(e.error)}.</div>`;
       rendered = true;
       continue;
     }
@@ -1582,7 +2168,8 @@ const PREF_FIELDS = ["slot", "days", "after", "before"];
 function savePrefs() {
   const prefs = {
     venues: [...document.querySelectorAll(".venues input:checked")].map(c => c.value),
-    hideEmpty: document.getElementById("hideEmpty").checked
+    hideEmpty: document.getElementById("hideEmpty").checked,
+    wxDays
   };
   for (const id of PREF_FIELDS) prefs[id] = document.getElementById(id).value;
 
@@ -1617,6 +2204,8 @@ function loadPrefs() {
   const hideEmpty = document.getElementById("hideEmpty");
   hideEmpty.checked = !!prefs.hideEmpty;
   document.body.classList.toggle("hide-empty", hideEmpty.checked);
+
+  if (WX_DAY_OPTIONS.includes(prefs.wxDays)) wxDays = prefs.wxDays;
 }
 
 // Show each selected venue's basic info immediately, without fetching availability.
@@ -1653,11 +2242,317 @@ document.getElementById("clearAll").onclick = () => {
 loadPrefs();
 updatePreview();
 
+const captureBookmarklet = document.getElementById("captureBookmarklet");
+const captureInput = document.getElementById("captureInput");
+const captureStatus = document.getElementById("captureStatus");
+captureBookmarklet.setAttribute("href", captureBookmarkletHref());
+
+function renderCapturedSummary() {
+  const captures = Object.values(loadCapturedData())
+    .filter(item => item && item.slug && item.ymd)
+    .sort((a, b) => String(a.ymd).localeCompare(String(b.ymd)) || String(a.venue).localeCompare(String(b.venue)));
+  const target = document.getElementById("captureSaved");
+
+  if (!captures.length) {
+    target.innerHTML = "";
+    return;
+  }
+
+  target.innerHTML = `<div class="capture-saved"><b>Saved captures</b><br>${captures.map(item =>
+    `${esc(item.venue)} · ${esc(dayLabel(item.iso))} · ${Object.values(item.courts || {}).reduce((sum, entries) => sum + entries.length, 0)} visible times`
+  ).join("<br>")}</div>`;
+}
+
+document.getElementById("copyBookmarklet").onclick = async () => {
+  const value = captureBookmarklet.getAttribute("href");
+  try {
+    await navigator.clipboard.writeText(value);
+    captureStatus.textContent = "Bookmarklet address copied. Create a browser bookmark and paste it as the bookmark address.";
+  } catch (e) {
+    captureStatus.textContent = "Drag the pink Court Capture link to your bookmarks bar, or right-click it and copy its link.";
+  }
+};
+
+function saveCapture(capture) {
+  const stored = loadCapturedData();
+  stored[captureStoreKey(capture.slug, capture.ymd)] = capture;
+  localStorage.setItem(CAPTURES_KEY, JSON.stringify(stored));
+
+  venueCache.clear();
+  blockedVenues.clear();
+  document.getElementById("date").value = capture.iso;
+  const checkbox = [...document.querySelectorAll(".venues input")].find(input => input.value === capture.venue);
+  if (checkbox) checkbox.checked = true;
+  savePrefs();
+  updatePreview();
+  renderCapturedSummary();
+}
+
+const captureSevenDaysButton = document.getElementById("captureSevenDays");
+const stopCaptureBatchButton = document.getElementById("stopCaptureBatch");
+const captureBatchStatus = document.getElementById("captureBatchStatus");
+
+function loadCaptureBatch() {
+  try {
+    const batch = JSON.parse(localStorage.getItem(CAPTURE_BATCH_KEY) || "null");
+    return batch && batch.version === 1 && Array.isArray(batch.queue) ? batch : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function storeCaptureBatch(batch) {
+  localStorage.setItem(CAPTURE_BATCH_KEY, JSON.stringify(batch));
+}
+
+function configureForTennisVenues(startIso) {
+  document.querySelectorAll(".venues input").forEach(input => {
+    input.checked = Object.prototype.hasOwnProperty.call(VENUES, input.value);
+  });
+  document.getElementById("date").value = startIso;
+  document.getElementById("days").value = "7";
+  savePrefs();
+  updatePreview();
+}
+
+function renderCaptureBatchStatus(batch = loadCaptureBatch()) {
+  if (!batch || batch.status !== "running" || batch.index >= batch.queue.length) {
+    captureSevenDaysButton.disabled = false;
+    captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+    stopCaptureBatchButton.hidden = true;
+    return;
+  }
+
+  const item = batch.queue[batch.index];
+  captureSevenDaysButton.disabled = false;
+  captureSevenDaysButton.textContent = `Resume capture · ${batch.index} of ${batch.queue.length} done`;
+  stopCaptureBatchButton.hidden = false;
+  captureBatchStatus.textContent = `Completed ${batch.index} of ${batch.queue.length}. Next: ${item.venue} on ${dayLabel(item.iso)}.`;
+}
+
+function launchCaptureBatch(batch, delay = 300) {
+  if (!batch || batch.status !== "running" || batch.index >= batch.queue.length) return;
+
+  storeCaptureBatch(batch);
+  renderCaptureBatchStatus(batch);
+  captureSevenDaysButton.disabled = true;
+
+  const item = batch.queue[batch.index];
+  captureBatchStatus.textContent = `Opening ${item.venue} for ${dayLabel(item.iso)} · ${batch.index + 1} of ${batch.queue.length}…`;
+
+  setTimeout(() => {
+    const current = loadCaptureBatch();
+    if (!current || current.status !== "running" || current.token !== batch.token || current.index !== batch.index) return;
+    location.assign(autoCaptureUrl(item.venue, item.iso, batch.token));
+  }, delay);
+}
+
+function finishCaptureBatch(batch) {
+  localStorage.removeItem(CAPTURE_BATCH_KEY);
+  configureForTennisVenues(batch.startIso);
+  captureSevenDaysButton.disabled = false;
+  captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+  stopCaptureBatchButton.hidden = true;
+
+  const failed = batch.errors.length;
+  captureBatchStatus.textContent = failed
+    ? `Finished ${batch.queue.length} pages: ${batch.successes} captured and ${failed} could not be read. Results are shown below.`
+    : `Finished all ${batch.queue.length} pages. Showing all 6 venues for 7 days.`;
+  setTimeout(() => document.getElementById("go").click(), 0);
+}
+
+function continueCaptureBatch(batch, errorMessage = "") {
+  if (errorMessage) {
+    const item = batch.queue[batch.index];
+    batch.errors.push({ venue: item.venue, iso: item.iso, message: errorMessage });
+  } else {
+    batch.successes += 1;
+  }
+
+  batch.index += 1;
+  if (batch.index >= batch.queue.length) {
+    finishCaptureBatch(batch);
+    return;
+  }
+
+  storeCaptureBatch(batch);
+  renderCaptureBatchStatus(batch);
+  launchCaptureBatch(batch, 1800);
+}
+
+function clearCaptureReturnHash() {
+  const clean = new URL(location.href);
+  clean.hash = "";
+  history.replaceState(null, "", clean.href);
+}
+
+function handleCaptureReturn() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const resultRaw = params.get("courtSearchResult");
+  const errorRaw = params.get("courtSearchError");
+  if (!resultRaw && !errorRaw) return false;
+
+  clearCaptureReturnHash();
+  let envelope;
+  try {
+    envelope = JSON.parse(resultRaw || errorRaw);
+  } catch (e) {
+    captureBatchStatus.textContent = "Safari returned capture data that Court Search could not read.";
+    captureBatchStatus.classList.add("err");
+    return true;
+  }
+
+  const batch = loadCaptureBatch();
+  const validToken = envelope?.token === CAPTURE_SESSION_TOKEN ||
+    (batch && envelope?.token === batch.token);
+  if (!validToken) {
+    captureBatchStatus.textContent = "Safari returned an expired capture. Please start the capture again.";
+    captureBatchStatus.classList.add("err");
+    return true;
+  }
+
+  if (errorRaw) {
+    const message = String(envelope.message || "The official page could not be read.");
+    if (batch && batch.status === "running") {
+      captureBatchStatus.textContent = `${message} Skipping this page and continuing…`;
+      continueCaptureBatch(batch, message);
+    } else {
+      captureStatus.textContent = message;
+      captureStatus.classList.add("err");
+    }
+    return true;
+  }
+
+  try {
+    const capture = normaliseCapture(JSON.stringify(envelope.payload));
+
+    if (batch && batch.status === "running") {
+      const expected = batch.queue[batch.index];
+      if (!expected || capture.slug !== expected.slug || capture.ymd !== expected.ymd) {
+        continueCaptureBatch(batch, "The returned venue or date did not match the current batch page.");
+        return true;
+      }
+
+      saveCapture(capture);
+      captureBatchStatus.classList.remove("err");
+      captureBatchStatus.textContent = `Captured ${capture.venue} on ${dayLabel(capture.iso)} · ${batch.index + 1} of ${batch.queue.length}.`;
+      continueCaptureBatch(batch);
+    } else {
+      saveCapture(capture);
+      captureStatus.classList.remove("err");
+      captureStatus.textContent = `Captured ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Refreshing results…`;
+      setTimeout(() => document.getElementById("go").click(), 0);
+    }
+  } catch (e) {
+    const message = e && e.message ? e.message : "Safari returned an invalid capture.";
+    if (batch && batch.status === "running") continueCaptureBatch(batch, message);
+    else {
+      captureStatus.textContent = message;
+      captureStatus.classList.add("err");
+    }
+  }
+  return true;
+}
+
+captureSevenDaysButton.onclick = () => {
+  const existing = loadCaptureBatch();
+  if (existing && existing.status === "running" && existing.index < existing.queue.length) {
+    launchCaptureBatch(existing);
+    return;
+  }
+
+  const startIso = document.getElementById("date").value || localDateISO();
+  if (startIso < localDateISO()) {
+    captureBatchStatus.textContent = "Choose today or a future date before starting the seven-day capture.";
+    captureBatchStatus.classList.add("err");
+    return;
+  }
+
+  const token = newCaptureToken();
+  CAPTURE_SESSION_TOKEN = token;
+  try { sessionStorage.setItem(CAPTURE_TOKEN_KEY, token); } catch (e) {}
+
+  const queue = [];
+  for (let day = 0; day < 7; day++) {
+    const iso = addDaysISO(startIso, day);
+    for (const [venue, slug] of Object.entries(VENUES)) {
+      queue.push({ venue, slug, iso, ymd: iso.replace(/-/g, "") });
+    }
+  }
+
+  const stored = loadCapturedData();
+  for (const item of queue) delete stored[captureStoreKey(item.slug, item.ymd)];
+  localStorage.setItem(CAPTURES_KEY, JSON.stringify(stored));
+
+  const batch = {
+    version: 1,
+    status: "running",
+    token,
+    startIso,
+    startedAt: new Date().toISOString(),
+    queue,
+    index: 0,
+    successes: 0,
+    errors: []
+  };
+
+  captureBatchStatus.classList.remove("err");
+  configureForTennisVenues(startIso);
+  renderCapturedSummary();
+  launchCaptureBatch(batch);
+};
+
+stopCaptureBatchButton.onclick = () => {
+  const batch = loadCaptureBatch();
+  localStorage.removeItem(CAPTURE_BATCH_KEY);
+  captureSevenDaysButton.disabled = false;
+  captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+  stopCaptureBatchButton.hidden = true;
+  captureBatchStatus.textContent = batch
+    ? `Capture stopped after ${batch.index} of ${batch.queue.length} pages. Times already captured were kept.`
+    : "Capture stopped.";
+};
+
+document.getElementById("importCapture").onclick = () => {
+  try {
+    const capture = normaliseCapture(captureInput.value.trim());
+    saveCapture(capture);
+    captureInput.value = "";
+    captureStatus.textContent = `Imported ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Press Check Availability to use them.`;
+  } catch (e) {
+    captureStatus.textContent = e && e.message ? e.message : "The capture could not be imported.";
+    captureStatus.classList.add("err");
+    return;
+  }
+  captureStatus.classList.remove("err");
+};
+
+window.addEventListener("message", event => {
+  if (event.origin !== SL_HOST || event.data?.type !== "court-search-capture" ||
+      event.data?.token !== CAPTURE_SESSION_TOKEN) return;
+
+  try {
+    const capture = normaliseCapture(JSON.stringify(event.data.payload));
+    saveCapture(capture);
+    captureStatus.classList.remove("err");
+    captureStatus.textContent = `Captured ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Refreshing results…`;
+    setTimeout(() => document.getElementById("go").click(), 0);
+  } catch (e) {
+    captureStatus.textContent = e && e.message ? e.message : "Safari returned an invalid capture.";
+    captureStatus.classList.add("err");
+  }
+});
+
+renderCapturedSummary();
+renderCaptureBatchStatus();
+handleCaptureReturn();
+
+
 // Fetch every venue for one day and return { ok, fail } plus the day's total slot count.
 async function checkAllVenues(venues, ymd, slot, after, before) {
   const results = await Promise.allSettled(
     venues.map(async v => {
-      const { slots, urls } = await cachedCheckVenue(v, ymd, slot);
+      const { slots, urls, capturedAt } = await cachedCheckVenue(v, ymd, slot);
       let a = slots;
 
       if (after || before) {
@@ -1668,7 +2563,7 @@ async function checkAllVenues(venues, ymd, slot, after, before) {
         a = f;
       }
 
-      return { v, a, urls };
+      return { v, a, urls, capturedAt };
     })
   );
 
@@ -1683,7 +2578,8 @@ async function checkAllVenues(venues, ymd, slot, after, before) {
     } else {
       fail.push({
         v: venues[i],
-        error: r.reason && r.reason.message ? r.reason.message : "Load failed"
+        error: r.reason && r.reason.message ? r.reason.message : "Load failed",
+        blocked: !!(r.reason && r.reason.blocked)
       });
     }
   }
@@ -1699,6 +2595,7 @@ async function checkAllVenues(venues, ymd, slot, after, before) {
 document.getElementById("go").onclick = async () => {
   const out = document.getElementById("out");
   const button = document.getElementById("go");
+  const searchStatus = document.getElementById("searchStatus");
 
   const venues = [...document.querySelectorAll(".venues input:checked")].map(c => c.value);
   const slot = +document.getElementById("slot").value;
@@ -1708,21 +2605,25 @@ document.getElementById("go").onclick = async () => {
 
   if (!venues.length) {
     out.innerHTML = '<div class="card err">Please select at least one venue.</div>';
+    searchStatus.textContent = "Please select at least one venue.";
     return;
   }
 
   if (after && before && hm(after) >= hm(before)) {
     out.innerHTML = '<div class="card err">Please make sure the "From Optional" time is earlier than the "To Optional" time.</div>';
+    searchStatus.textContent = 'Please make sure the "From Optional" time is earlier than the "To Optional" time.';
     return;
   }
 
   const chosen = document.getElementById("date").value;
   if (!chosen) {
     out.innerHTML = '<div class="card err">Please choose a date.</div>';
+    searchStatus.textContent = "Please choose a date.";
     return;
   }
   if (chosen < localDateISO()) {
     out.innerHTML = '<div class="card err">Please choose today or a future date.</div>';
+    searchStatus.textContent = "Please choose today or a future date.";
     return;
   }
 
@@ -1730,13 +2631,19 @@ document.getElementById("go").onclick = async () => {
   const dates = [];
   for (let i = 0; i < days; i++) dates.push(addDaysISO(chosen, i));
 
-  // The weather strip always shows a 12-day outlook from the chosen date,
-  // independent of how many days of availability are being checked.
-  const weatherDates = [];
-  for (let i = 0; i < 12; i++) weatherDates.push(addDaysISO(chosen, i));
+  // The weather strip shows an outlook from the chosen date, independent of
+  // how many days of availability are being checked (toggle: 7 / 12 / 16).
+  wxStart = chosen;
+
+  // Every check starts from scratch: drop last run's results so the numbers
+  // you see are fetched now, not reused from an earlier click.
+  venueCache.clear();
+  blockedVenues.clear();
 
   button.disabled = true;
   button.textContent = "Checking...";
+  button.setAttribute("aria-busy", "true");
+  searchStatus.textContent = `Checking ${venues.length} venue${venues.length === 1 ? "" : "s"}.`;
 
   const multiDay = days > 1;
   const dayWord = multiDay ? ` across ${days} days` : "";
@@ -1765,7 +2672,10 @@ document.getElementById("go").onclick = async () => {
       : "";
 
     const body = cards || (stillLoading ? "" : '<div class="card mut">No results found.</div>');
-    out.innerHTML = renderWeatherStrip(weatherDates) + body + spinner;
+    out.innerHTML = renderWeatherStrip() + body + spinner;
+    if (multiDay && stillLoading) {
+      searchStatus.textContent = `Checked ${daysDone} of ${dates.length} days.`;
+    }
   }
 
   // Kick off the weather forecast in parallel; repaint once it lands so the
@@ -1786,8 +2696,12 @@ document.getElementById("go").onclick = async () => {
       fail.forEach(f => failMap[f.v] = f);
 
       for (const v of venues) {
-        if (okMap[v]) venueDays[v].push({ iso, a: okMap[v].a, urls: okMap[v].urls });
-        else if (failMap[v]) venueDays[v].push({ iso, error: failMap[v].error });
+        if (okMap[v]) venueDays[v].push({ iso, a: okMap[v].a, urls: okMap[v].urls, capturedAt: okMap[v].capturedAt });
+        else if (failMap[v]) venueDays[v].push({
+          iso,
+          error: failMap[v].error,
+          blocked: failMap[v].blocked
+        });
       }
 
       daysDone++;
@@ -1796,15 +2710,19 @@ document.getElementById("go").onclick = async () => {
   } finally {
     button.disabled = false;
     button.textContent = "Check Availability";
+    button.removeAttribute("aria-busy");
+    searchStatus.textContent = `Availability check complete for ${venues.length} venue${venues.length === 1 ? "" : "s"}.`;
   }
 };
 
-// Cute cats drifting both behind and over the content.
+// Decorative shapes drift behind the content and stay hidden from assistive technology.
 (function cats() {
   const back = document.createElement("div");
   back.id = "cats";
+  back.setAttribute("aria-hidden", "true");
   const front = document.createElement("div");
   front.id = "cats-front";
+  front.setAttribute("aria-hidden", "true");
   document.body.appendChild(back);
   document.body.appendChild(front);
 
@@ -1819,7 +2737,7 @@ document.getElementById("go").onclick = async () => {
     c.style.fontSize = (18 + Math.random() * 20) + "px";
     c.style.animationDuration = (7 + Math.random() * 8) + "s";
     c.style.animationDelay = (-Math.random() * 15) + "s";
-    // ~40% drift in front of the content, the rest behind.
+    // Split them between two decorative layers to keep their paths varied.
     (Math.random() < 0.4 ? front : back).appendChild(c);
   }
 })();
