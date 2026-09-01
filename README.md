@@ -65,13 +65,15 @@ Safari opens the official selected-date page, the userscript reads the visible
 times, sends them back to the Court Search tab, and asks Safari to close the
 temporary tab. No copying, dragging, password access or cookie access is used.
 
-### Capture all six venues for three days
+### Capture selected venues and days
 
-Install or update to `court-capture.user.js` version 1.1, choose the starting
-date, then press **Capture all 6 venues · 3 days**. Court Search processes the
-18 venue/date pages one at a time in the same Safari tab, with a short delay
-between pages. Keep Safari open until the progress reaches 18 of 18. Successful
-captures are kept if a page fails or the batch is stopped.
+Install or update to `court-capture.user.js` version 1.1, select the Tennis
+Venues locations, starting date and Days filter, then press the batch capture
+button. Its label shows the exact number of pages before the batch starts.
+Court Search processes those venue/date pages one at a time in the same Safari
+tab, with a short delay between pages. Slot length and From/To filters are
+applied to the results after capture. Successful captures are kept if a page
+fails or the batch is stopped.
 
 ### Manual capture fallback
 
