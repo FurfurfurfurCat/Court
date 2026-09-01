@@ -65,12 +65,12 @@ Safari opens the official selected-date page, the userscript reads the visible
 times, sends them back to the Court Search tab, and asks Safari to close the
 temporary tab. No copying, dragging, password access or cookie access is used.
 
-### Capture all six venues for seven days
+### Capture all six venues for three days
 
 Install or update to `court-capture.user.js` version 1.1, choose the starting
-date, then press **Capture all 6 venues · 7 days**. Court Search processes the
-42 venue/date pages one at a time in the same Safari tab, with a short delay
-between pages. Keep Safari open until the progress reaches 42 of 42. Successful
+date, then press **Capture all 6 venues · 3 days**. Court Search processes the
+18 venue/date pages one at a time in the same Safari tab, with a short delay
+between pages. Keep Safari open until the progress reaches 18 of 18. Successful
 captures are kept if a page fails or the batch is stopped.
 
 ### Manual capture fallback

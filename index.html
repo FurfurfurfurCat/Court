@@ -1056,10 +1056,10 @@ body > #out {
 
 <section class="card capture-batch" aria-labelledby="captureBatchHeading">
   <h2 id="captureBatchHeading">Capture all Tennis Venues</h2>
-  <div class="mut">One Safari run checks all 6 locations for 7 days, starting from your selected date. Keep Safari open while it works through 42 official pages.</div>
+  <div class="mut">One Safari run checks all 6 locations for 3 days, starting from your selected date. Keep Safari open while it works through 18 official pages.</div>
   <div class="mut"><b>Existing users:</b> open <a href="court-capture.user.js">Court Capture for Safari v1.1</a> and approve the update once before starting.</div>
   <div class="capture-batch-actions">
-    <button id="captureSevenDays" type="button">Capture all 6 venues · 7 days</button>
+    <button id="captureBatch" type="button">Capture all 6 venues · 3 days</button>
     <button class="secondary" id="stopCaptureBatch" type="button" hidden>Stop capture</button>
   </div>
   <div class="capture-batch-status mut" id="captureBatchStatus" role="status" aria-live="polite"></div>
@@ -1075,7 +1075,7 @@ body > #out {
     <li>Allow Userscripts on <b>tennisvenues.com.au</b>, then sign in there once.</li>
     <li>Use <b>Capture this date in Safari</b> on a result card. The official page will return the times automatically.</li>
   </ol>
-  <div class="mut">Safari will move between the official page and Court Search while it captures. Keep Safari open until the progress reaches 42 of 42.</div>
+  <div class="mut">Safari will move between the official page and Court Search while it captures. Keep Safari open until the progress reaches 18 of 18.</div>
   <hr>
   <div class="mut"><b>Manual fallback</b> for a browser without the userscript:</div>
   <ol class="capture-steps">
@@ -1370,6 +1370,7 @@ function earliestTime(result) {
 const CAPTURES_KEY = "courtCaptures.v1";
 const CAPTURE_BATCH_KEY = "courtCaptureBatch.v1";
 const CAPTURE_TOKEN_KEY = "courtCaptureToken.v1";
+const CAPTURE_BATCH_DAYS = 3;
 
 function newCaptureToken() {
   return (globalThis.crypto && typeof crypto.randomUUID === "function")
@@ -2288,7 +2289,7 @@ function saveCapture(capture) {
   renderCapturedSummary();
 }
 
-const captureSevenDaysButton = document.getElementById("captureSevenDays");
+const captureBatchButton = document.getElementById("captureBatch");
 const stopCaptureBatchButton = document.getElementById("stopCaptureBatch");
 const captureBatchStatus = document.getElementById("captureBatchStatus");
 
@@ -2310,22 +2311,22 @@ function configureForTennisVenues(startIso) {
     input.checked = Object.prototype.hasOwnProperty.call(VENUES, input.value);
   });
   document.getElementById("date").value = startIso;
-  document.getElementById("days").value = "7";
+  document.getElementById("days").value = String(CAPTURE_BATCH_DAYS);
   savePrefs();
   updatePreview();
 }
 
 function renderCaptureBatchStatus(batch = loadCaptureBatch()) {
   if (!batch || batch.status !== "running" || batch.index >= batch.queue.length) {
-    captureSevenDaysButton.disabled = false;
-    captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+    captureBatchButton.disabled = false;
+    captureBatchButton.textContent = "Capture all 6 venues · 3 days";
     stopCaptureBatchButton.hidden = true;
     return;
   }
 
   const item = batch.queue[batch.index];
-  captureSevenDaysButton.disabled = false;
-  captureSevenDaysButton.textContent = `Resume capture · ${batch.index} of ${batch.queue.length} done`;
+  captureBatchButton.disabled = false;
+  captureBatchButton.textContent = `Resume capture · ${batch.index} of ${batch.queue.length} done`;
   stopCaptureBatchButton.hidden = false;
   captureBatchStatus.textContent = `Completed ${batch.index} of ${batch.queue.length}. Next: ${item.venue} on ${dayLabel(item.iso)}.`;
 }
@@ -2335,7 +2336,7 @@ function launchCaptureBatch(batch, delay = 300) {
 
   storeCaptureBatch(batch);
   renderCaptureBatchStatus(batch);
-  captureSevenDaysButton.disabled = true;
+  captureBatchButton.disabled = true;
 
   const item = batch.queue[batch.index];
   captureBatchStatus.textContent = `Opening ${item.venue} for ${dayLabel(item.iso)} · ${batch.index + 1} of ${batch.queue.length}…`;
@@ -2350,14 +2351,14 @@ function launchCaptureBatch(batch, delay = 300) {
 function finishCaptureBatch(batch) {
   localStorage.removeItem(CAPTURE_BATCH_KEY);
   configureForTennisVenues(batch.startIso);
-  captureSevenDaysButton.disabled = false;
-  captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+  captureBatchButton.disabled = false;
+  captureBatchButton.textContent = "Capture all 6 venues · 3 days";
   stopCaptureBatchButton.hidden = true;
 
   const failed = batch.errors.length;
   captureBatchStatus.textContent = failed
     ? `Finished ${batch.queue.length} pages: ${batch.successes} captured and ${failed} could not be read. Results are shown below.`
-    : `Finished all ${batch.queue.length} pages. Showing all 6 venues for 7 days.`;
+    : `Finished all ${batch.queue.length} pages. Showing all 6 venues for ${CAPTURE_BATCH_DAYS} days.`;
   setTimeout(() => document.getElementById("go").click(), 0);
 }
 
@@ -2454,7 +2455,7 @@ function handleCaptureReturn() {
   return true;
 }
 
-captureSevenDaysButton.onclick = () => {
+captureBatchButton.onclick = () => {
   const existing = loadCaptureBatch();
   if (existing && existing.status === "running" && existing.index < existing.queue.length) {
     launchCaptureBatch(existing);
@@ -2463,7 +2464,7 @@ captureSevenDaysButton.onclick = () => {
 
   const startIso = document.getElementById("date").value || localDateISO();
   if (startIso < localDateISO()) {
-    captureBatchStatus.textContent = "Choose today or a future date before starting the seven-day capture.";
+    captureBatchStatus.textContent = "Choose today or a future date before starting the three-day capture.";
     captureBatchStatus.classList.add("err");
     return;
   }
@@ -2473,7 +2474,7 @@ captureSevenDaysButton.onclick = () => {
   try { sessionStorage.setItem(CAPTURE_TOKEN_KEY, token); } catch (e) {}
 
   const queue = [];
-  for (let day = 0; day < 7; day++) {
+  for (let day = 0; day < CAPTURE_BATCH_DAYS; day++) {
     const iso = addDaysISO(startIso, day);
     for (const [venue, slug] of Object.entries(VENUES)) {
       queue.push({ venue, slug, iso, ymd: iso.replace(/-/g, "") });
@@ -2505,8 +2506,8 @@ captureSevenDaysButton.onclick = () => {
 stopCaptureBatchButton.onclick = () => {
   const batch = loadCaptureBatch();
   localStorage.removeItem(CAPTURE_BATCH_KEY);
-  captureSevenDaysButton.disabled = false;
-  captureSevenDaysButton.textContent = "Capture all 6 venues · 7 days";
+  captureBatchButton.disabled = false;
+  captureBatchButton.textContent = "Capture all 6 venues · 3 days";
   stopCaptureBatchButton.hidden = true;
   captureBatchStatus.textContent = batch
     ? `Capture stopped after ${batch.index} of ${batch.queue.length} pages. Times already captured were kept.`

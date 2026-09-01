@@ -2,7 +2,7 @@
 // @name         Court Search – Tennis Venues Capture
 // @namespace    court-search.local
 // @version      1.1.0
-// @description  Returns visible Tennis Venues availability to Court Search, including seven-day batches.
+// @description  Returns visible Tennis Venues availability to Court Search, including multi-day batches.
 // @match        https://www.tennisvenues.com.au/booking/*/timeslot*
 // @grant        none
 // @inject-into  content
