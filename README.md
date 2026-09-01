@@ -58,8 +58,8 @@ extensions and some browser features don't work on `file://` pages.
    menu, and approve the installation.
 4. Allow Userscripts on `tennisvenues.com.au`, then sign in to Tennis Venues
    once in Safari.
-5. In Court Search, press **Check Availability**, then use **Capture this date
-   in Safari** on the blocked venue card.
+5. In Court Search, select a Tennis Venues location and press **Check
+   Availability**. The capture starts automatically.
 
 Safari opens the official selected-date page, the userscript reads the visible
 times, sends them back to the Court Search tab, and asks Safari to close the
@@ -67,13 +67,15 @@ temporary tab. No copying, dragging, password access or cookie access is used.
 
 ### Capture selected venues and days
 
-Install or update to `court-capture.user.js` version 1.1, select the Tennis
-Venues locations, starting date and Days filter, then press the batch capture
-button. Its label shows the exact number of pages before the batch starts.
-Court Search processes those venue/date pages one at a time in the same Safari
-tab, with a short delay between pages. Slot length and From/To filters are
-applied to the results after capture. Successful captures are kept if a page
-fails or the batch is stopped.
+Install or update to `court-capture.user.js` version 1.1, then select the Tennis
+Venues locations, starting date and Days filter. Every time **Check
+Availability** is pressed, Court Search refreshes all selected Tennis Venues
+pages first and then displays the results. The separate batch button can still
+start or resume the capture manually, and its label shows the exact number of
+pages. Court Search processes those venue/date pages one at a time in the same
+Safari tab, with a short delay between pages. Slot length and From/To filters
+are applied to the results after capture. Successful captures are kept if a
+page fails or the batch is stopped.
 
 ### Manual capture fallback
 
@@ -135,10 +137,10 @@ Single HTML file, no build step, no dependencies, no framework.
 | Open-Meteo | Called directly from the browser; free, no key, CORS-friendly |
 
 **Every automatic check refetches.** Pressing *Check Availability* goes back to
-the network for Ku-ring-gai and BCS venues — court availability changes minute
-to minute, so a cached answer for a fresh check would be wrong. Imported
-tennisvenues captures are the exception: they remain local until you replace
-them with a newer capture. Automatic results are cached only within a single
+the network for Ku-ring-gai and BCS venues and starts a fresh Safari capture for
+the selected Tennis Venues locations. Court availability changes minute to
+minute, so a cached answer for a fresh check would be wrong. Manually imported
+captures remain local until they are replaced. Automatic results are cached only within a single
 run. Lookups are capped at 5 concurrent. Failures aren't cached, so failed
 venues retry on the next check. Venue, filter and imported-capture choices
 persist in `localStorage`; the selected date does not.

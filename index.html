@@ -1056,7 +1056,8 @@ body > #out {
 
 <section class="card capture-batch" aria-labelledby="captureBatchHeading">
   <h2 id="captureBatchHeading">Capture selected Tennis Venues</h2>
-  <div class="mut">The batch follows your selected Tennis Venues locations, starting date, and Days filter. Slot length and time filters are applied when the captured results are displayed.</div>
+  <div class="mut">Check Availability automatically refreshes your selected Tennis Venues locations for the chosen starting date and Days filter, then displays all filtered results. Use the button below only to start or resume that capture manually.</div>
+  <div class="mut">Slot length and time filters are applied after the official times have been captured.</div>
   <div class="mut">Requires <a href="court-capture.user.js">Court Capture for Safari v1.1</a>. If it is not installed yet, use the Safari setup below.</div>
   <div class="capture-batch-actions">
     <button id="captureBatch" type="button">Capture selected Tennis Venues</button>
@@ -2291,6 +2292,12 @@ function saveCapture(capture) {
 const captureBatchButton = document.getElementById("captureBatch");
 const stopCaptureBatchButton = document.getElementById("stopCaptureBatch");
 const captureBatchStatus = document.getElementById("captureBatchStatus");
+let skipAutomaticCaptureOnce = false;
+
+function runAvailabilityWithoutRecapture() {
+  skipAutomaticCaptureOnce = true;
+  setTimeout(() => document.getElementById("go").click(), 0);
+}
 
 function selectedResultVenues() {
   return [...document.querySelectorAll(".venues input:checked")].map(input => input.value);
@@ -2387,7 +2394,7 @@ function finishCaptureBatch(batch) {
   captureBatchStatus.textContent = failed
     ? `Finished ${batch.queue.length} pages: ${batch.successes} captured and ${failed} could not be read. Results are shown below.`
     : `Finished all ${batch.queue.length} pages for ${capturedVenues.length} Tennis Venues location${capturedVenues.length === 1 ? "" : "s"} across ${days} day${days === 1 ? "" : "s"}.`;
-  setTimeout(() => document.getElementById("go").click(), 0);
+  runAvailabilityWithoutRecapture();
 }
 
 function continueCaptureBatch(batch, errorMessage = "") {
@@ -2470,7 +2477,7 @@ function handleCaptureReturn() {
       saveCapture(capture);
       captureStatus.classList.remove("err");
       captureStatus.textContent = `Captured ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Refreshing results…`;
-      setTimeout(() => document.getElementById("go").click(), 0);
+      runAvailabilityWithoutRecapture();
     }
   } catch (e) {
     const message = e && e.message ? e.message : "Safari returned an invalid capture.";
@@ -2483,18 +2490,18 @@ function handleCaptureReturn() {
   return true;
 }
 
-captureBatchButton.onclick = () => {
+function startCaptureBatchFromFilters() {
   const existing = loadCaptureBatch();
   if (existing && existing.status === "running" && existing.index < existing.queue.length) {
     launchCaptureBatch(existing);
-    return;
+    return true;
   }
 
   const startIso = document.getElementById("date").value || localDateISO();
   if (startIso < localDateISO()) {
     captureBatchStatus.textContent = "Choose today or a future date before starting the capture.";
     captureBatchStatus.classList.add("err");
-    return;
+    return false;
   }
 
   const resultVenues = selectedResultVenues();
@@ -2503,7 +2510,7 @@ captureBatchButton.onclick = () => {
   if (!captureVenues.length) {
     captureBatchStatus.textContent = "Select at least one Tennis Venues location before starting the capture.";
     captureBatchStatus.classList.add("err");
-    return;
+    return false;
   }
 
   const token = newCaptureToken();
@@ -2543,7 +2550,10 @@ captureBatchButton.onclick = () => {
   updatePreview();
   renderCapturedSummary();
   launchCaptureBatch(batch);
-};
+  return true;
+}
+
+captureBatchButton.onclick = startCaptureBatchFromFilters;
 
 stopCaptureBatchButton.onclick = () => {
   const batch = loadCaptureBatch();
@@ -2583,7 +2593,7 @@ window.addEventListener("message", event => {
     saveCapture(capture);
     captureStatus.classList.remove("err");
     captureStatus.textContent = `Captured ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Refreshing results…`;
-    setTimeout(() => document.getElementById("go").click(), 0);
+    runAvailabilityWithoutRecapture();
   } catch (e) {
     captureStatus.textContent = e && e.message ? e.message : "Safari returned an invalid capture.";
     captureStatus.classList.add("err");
@@ -2671,6 +2681,14 @@ document.getElementById("go").onclick = async () => {
   if (chosen < localDateISO()) {
     out.innerHTML = '<div class="card err">Please choose today or a future date.</div>';
     searchStatus.textContent = "Please choose today or a future date.";
+    return;
+  }
+
+  if (skipAutomaticCaptureOnce) {
+    skipAutomaticCaptureOnce = false;
+  } else if (selectedCaptureVenues().length) {
+    captureBatchStatus.textContent = "Refreshing the selected Tennis Venues before checking availability…";
+    startCaptureBatchFromFilters();
     return;
   }
 
