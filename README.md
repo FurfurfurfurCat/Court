@@ -62,32 +62,18 @@ extensions and some browser features don't work on `file://` pages.
    Availability**. The capture starts automatically.
 
 Safari opens the official selected-date page, the userscript reads the visible
-times, sends them back to the Court Search tab, and asks Safari to close the
-temporary tab. No copying, dragging, password access or cookie access is used.
+times, then returns to Court Search in the same tab. No copying, dragging,
+password access or cookie access is used.
 
 ### Capture selected venues and days
 
 Install or update to `court-capture.user.js` version 1.1, then select the Tennis
 Venues locations, starting date and Days filter. Every time **Check
 Availability** is pressed, Court Search refreshes all selected Tennis Venues
-pages first and then displays the results. The separate batch button can still
-start or resume the capture manually, and its label shows the exact number of
-pages. Court Search processes those venue/date pages one at a time in the same
-Safari tab, with a short delay between pages. Slot length and From/To filters
-are applied to the results after capture. Successful captures are kept if a
-page fails or the batch is stopped.
-
-### Manual capture fallback
-
-1. Open **Safari setup for Tennis Venues** in the app.
-2. Drag **Court Capture** to the bookmarks bar in Chrome or Safari.
-3. Use **View official times** on a venue card to open the chosen date.
-4. Click the Court Capture bookmark on that official page.
-5. Return to Court Search, paste the copied data, import it, and press
-   **Check Availability**.
-
-Imported availability is stored locally for that venue and date. Capture it
-again whenever you need fresher results.
+pages first and then displays the results. Court Search processes those
+venue/date pages one at a time in the same Safari tab, with a short delay
+between pages. Slot length and From/To filters are applied after capture.
+Successful captures are kept if a page fails or the capture is stopped.
 
 ## Fork it
 
@@ -133,17 +119,17 @@ Single HTML file, no build step, no dependencies, no framework.
 |---|---|
 | Ku-ring-gai (Bookable/Attekus) | JSON API via Worker; opening hours minus bookings, sunrise/sunset applied |
 | tennisbcs.com.au | ASP.NET pages via Worker; POST-driven date and pagination, scraped |
-| tennisvenues.com.au | Not fetched; optionally imported from a user-assisted capture of the visible official page |
+| tennisvenues.com.au | Captured from the visible official page in the user's signed-in Safari session |
 | Open-Meteo | Called directly from the browser; free, no key, CORS-friendly |
 
 **Every automatic check refetches.** Pressing *Check Availability* goes back to
 the network for Ku-ring-gai and BCS venues and starts a fresh Safari capture for
 the selected Tennis Venues locations. Court availability changes minute to
-minute, so a cached answer for a fresh check would be wrong. Manually imported
-captures remain local until they are replaced. Automatic results are cached only within a single
-run. Lookups are capped at 5 concurrent. Failures aren't cached, so failed
-venues retry on the next check. Venue, filter and imported-capture choices
-persist in `localStorage`; the selected date does not.
+minute, so a cached answer for a fresh check would be wrong. Captured pages stay
+local only until the next check replaces them. Automatic results are cached
+only within a single run. Lookups are capped at 5 concurrent. Failures aren't
+cached, so failed venues retry on the next check. Venue, filter and captured
+availability choices persist in `localStorage`; the selected date does not.
 
 The six tennisvenues venues are never fetched by the app. With no imported
 capture their cards stay as official links; with a capture they show the saved
@@ -164,8 +150,8 @@ are different answers and the UI keeps them distinct.
 ## Limitations
 
 - Availability is only as fresh as the moment you check; nothing is pushed
-- Tennisvenues results require a user-assisted capture for each venue and date,
-  and stay unchanged until captured again
+- Tennis Venues results require the Safari userscript and an active signed-in
+  session; each check refreshes the selected venue and date pages
 - BCS venues are scraped from HTML, so a redesign there will break them
 - Sydney daylight-saving offsets are computed, not looked up — correct under
   current rules, would need updating if those change
