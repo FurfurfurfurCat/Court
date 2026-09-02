@@ -1885,7 +1885,7 @@ function venueMetaHtml(v) {
   else rows.push(`<span class="mi">📍</span><a href="${esc(mapUrl(v))}" target="_blank" rel="noopener">Open in Google Maps ↗</a>`);
   if (d.phone) rows.push(`<span class="mi">📞</span><a href="tel:${esc(d.phone.replace(/[^\d+]/g, ""))}">${esc(d.phone)}</a>`);
   if (d.email) rows.push(`<span class="mi">✉️</span><a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`);
-  if (d.rate) rows.push(`<span class="mi">💵</span><span class="venue-rate"${d.rateNote ? ` title="${esc(d.rateNote)}"` : ""}>${esc(d.rate)} <a href="${esc(d.rateUrl || bookUrl(v))}" target="_blank" rel="noopener">Rates ↗</a>${d.memberUrl ? ` <a href="${esc(d.memberUrl)}" target="_blank" rel="noopener">Membership ↗</a>` : ""}${d.rateNote ? `<span class="mut"><br>${esc(d.rateNote)}</span>` : ""}</span>`);
+  if (d.rate) rows.push(`<span class="mi">💵</span><span class="venue-rate"${d.rateNote ? ` title="${esc(d.rateNote)}"` : ""}>${esc(d.rate)}${d.memberUrl ? ` <a href="${esc(d.memberUrl)}" target="_blank" rel="noopener">Membership ↗</a>` : ""}${d.rateNote ? `<span class="mut"><br>${esc(d.rateNote)}</span>` : ""}</span>`);
   return `<div class="venue-meta">${rows.join("")}</div>`;
 }
 
