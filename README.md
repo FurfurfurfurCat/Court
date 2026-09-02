@@ -26,7 +26,7 @@ Eight of the fourteen are automatic. Two groups, two data sources:
 |---|---|---|
 | Allan Small, Tyron, Roseville, Loyal Henry, Elizabeth | Ku-ring-gai Council (Bookable) | Automatic |
 | Pennant Hills, Beecroft, Cowells Lane | tennisbcs.com.au | Automatic |
-| Marsfield, GPA, Ryde, Artarmon, Vince Barclay, Midson | tennisvenues.com.au | Automatic Safari-assisted capture — see below |
+| Marsfield, GPA, Ryde, Artarmon, Vince Barclay, Midson | tennisvenues.com.au | Automatic browser-assisted capture — see below |
 
 The Ku-ring-gai courts include unlit ones, where the council opens at sunrise
 and closes at sunset. Those sunrise/sunset times are computed per date (NOAA
@@ -40,7 +40,7 @@ availability — its `robots.txt` disallows the data endpoint and an AWS WAF
 challenge enforces it. **This app does not try to get around that.**
 
 They still appear in the list with their address, phone, email, rates and a
-maps link. The Safari userscript reads only the visible booking links on the
+maps link. The Court Capture userscript reads only the visible booking links on the
 official page opened in your own browser; it does not copy cookies or make
 hidden requests.
 
@@ -54,10 +54,13 @@ For local use, `start.command` (macOS: double-click) serves the folder at
 Prefer the served URL over opening `index.html` off disk — Safari
 extensions and some browser features don't work on `file://` pages.
 
-### Automatic Safari capture (iPhone or Mac)
+### Automatic capture on iPhone or iPad
+
+Chrome on a phone cannot install the extension required for capture. Open Court
+Search in Safari, then:
 
 1. Install the free [Userscripts Safari extension](https://apps.apple.com/au/app/userscripts/id1463298887).
-2. On iPhone, enable it under **Settings → Apps → Safari → Extensions**.
+2. Enable it under **Settings → Apps → Safari → Extensions**.
 3. Open `court-capture.user.js` in Safari, open the Userscripts extension
    menu, and approve the installation.
 4. Allow Userscripts on `tennisvenues.com.au`, then sign in to Tennis Venues
@@ -69,13 +72,25 @@ Safari opens the official selected-date page, the userscript reads the visible
 times, then returns to Court Search in the same tab. No copying, dragging,
 password access or cookie access is used.
 
+### Automatic capture in Chrome on a computer
+
+1. Install [Tampermonkey from the Chrome Web Store](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo).
+2. Open **Chrome → Extensions → Manage Extensions → Tampermonkey →
+   Details**, then turn on **Allow User Scripts**.
+3. Open `court-capture.user.js`, then select **Install** in Tampermonkey.
+4. Allow Tampermonkey on `tennisvenues.com.au`, then sign in there once.
+5. Return to Court Search in Chrome and press **Check Availability**.
+
+The same Court Capture userscript works in Chrome on Mac and Windows. Keep the
+browser open while the selected venue and date pages are processed.
+
 ### Capture selected venues and days
 
 Install or update to `court-capture.user.js` version 1.1, then select the Tennis
 Venues locations, starting date and Days filter. Every time **Check
 Availability** is pressed, Court Search refreshes all selected Tennis Venues
 pages first and then displays the results. Court Search processes those
-venue/date pages one at a time in the same Safari tab, with a short delay
+venue/date pages one at a time in the same browser tab, with a short delay
 between pages. Slot length and From/To filters are applied after capture.
 Successful captures are kept if a page fails or the capture is stopped.
 
@@ -123,11 +138,11 @@ Single HTML file, no build step, no dependencies, no framework.
 |---|---|
 | Ku-ring-gai (Bookable/Attekus) | JSON API via Worker; opening hours minus bookings, sunrise/sunset applied |
 | tennisbcs.com.au | ASP.NET pages via Worker; POST-driven date and pagination, scraped |
-| tennisvenues.com.au | Captured from the visible official page in the user's signed-in Safari session |
+| tennisvenues.com.au | Captured from the visible official page in the user's signed-in browser session |
 | Open-Meteo | Called directly from the browser; free, no key, CORS-friendly |
 
 **Every automatic check refetches.** Pressing *Check Availability* goes back to
-the network for Ku-ring-gai and BCS venues and starts a fresh Safari capture for
+the network for Ku-ring-gai and BCS venues and starts a fresh browser capture for
 the selected Tennis Venues locations. Court availability changes minute to
 minute, so a cached answer for a fresh check would be wrong. Captured pages stay
 local only until the next check replaces them. Automatic results are cached
@@ -154,7 +169,7 @@ are different answers and the UI keeps them distinct.
 ## Limitations
 
 - Availability is only as fresh as the moment you check; nothing is pushed
-- Tennis Venues results require the Safari userscript and an active signed-in
+- Tennis Venues results require the Court Capture userscript and an active signed-in
   session; each check refreshes the selected venue and date pages
 - BCS venues are scraped from HTML, so a redesign there will break them
 - Sydney daylight-saving offsets are computed, not looked up — correct under

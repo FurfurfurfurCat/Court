@@ -523,6 +523,13 @@ a.t:active {
   line-height:1.55;
 }
 
+.capture-device-title {
+  margin:16px 0 4px;
+  color:var(--acc2);
+  font-size:15px;
+  font-weight:900;
+}
+
 .search-actions {
   display:flex;
   gap:10px;
@@ -1004,23 +1011,35 @@ body.hide-empty .venue-empty {
     <button class="secondary" id="stopCaptureBatch" type="button" hidden>Stop capture</button>
   </div>
   <div class="capture-inline">
-    <span>Selected Tennis Venues refresh automatically in Safari.</span>
+    <span>Automatic capture works in Safari, or Chrome on a computer.</span>
     <a href="#captureTools" onclick="document.getElementById('captureTools').open=true">One-time setup ↓</a>
   </div>
   <div class="capture-batch-status mut" id="captureBatchStatus" role="status" aria-live="polite"></div>
 </div>
 
 <details class="card capture-panel" id="captureTools">
-  <summary>One-time Safari setup for Tennis Venues</summary>
+  <summary>One-time browser setup for Tennis Venues</summary>
   <div class="mut">This is only needed for the six Tennis Venues locations. Court Capture reads the times displayed after you sign in; it does not copy your password or cookies.</div>
+
+  <div class="capture-device-title">iPhone or iPad</div>
+  <div class="mut">Chrome on a phone cannot use extensions. Open Court Search in <b>Safari</b> for automatic capture.</div>
   <ol class="capture-steps">
     <li>Install the free <a class="manual-link" href="https://apps.apple.com/au/app/userscripts/id1463298887" target="_blank" rel="noopener">Userscripts Safari extension ↗</a>.</li>
-    <li>On iPhone, enable it in <b>Settings → Apps → Safari → Extensions</b>.</li>
-    <li>Open <a class="manual-link" href="court-capture.user.js">Court Capture for Safari</a>, open the Userscripts extension menu, and approve the installation.</li>
+    <li>Enable it in <b>Settings → Apps → Safari → Extensions</b>.</li>
+    <li>Open <a class="manual-link" href="court-capture.user.js">Court Capture</a>, open the Userscripts extension menu, and approve the installation.</li>
     <li>Allow Userscripts on <b>tennisvenues.com.au</b>, then sign in there once.</li>
     <li>Return here and press <b>Check Availability</b>. The official pages will return automatically.</li>
   </ol>
-  <div class="mut">Keep Safari open while Court Search moves through the selected venue and date pages.</div>
+
+  <div class="capture-device-title">Chrome on a Mac or Windows computer</div>
+  <ol class="capture-steps">
+    <li>Install <a class="manual-link" href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank" rel="noopener">Tampermonkey from the Chrome Web Store ↗</a>.</li>
+    <li>Open <b>Chrome → Extensions → Manage Extensions → Tampermonkey → Details</b>, then turn on <b>Allow User Scripts</b>.</li>
+    <li>Open <a class="manual-link" href="court-capture.user.js">Court Capture</a>, then select <b>Install</b> in Tampermonkey.</li>
+    <li>Allow Tampermonkey on <b>tennisvenues.com.au</b>, then sign in there once.</li>
+    <li>Return here in Chrome and press <b>Check Availability</b>. The official pages will return automatically.</li>
+  </ol>
+  <div class="mut">Keep the browser open while Court Search moves through the selected venue and date pages.</div>
 </details>
 
 <div id="out"></div>
@@ -1906,8 +1925,8 @@ function courtHtml(v, c, times, urls) {
 function blockedNoteHtml(v, iso = "") {
   const dateText = iso ? ` for ${dayLabel(iso)}` : "";
   return `<div class="note"><span class="mi">🔒</span><div>The official times for ${esc(v)} could not be captured.
-    <a class="manual-link auto-capture-link" href="${esc(autoCaptureUrl(v, iso))}">Try this date again in Safari${esc(dateText)} ↗</a>
-    <a href="#captureTools" onclick="document.getElementById('captureTools').open=true">Safari setup ↓</a>
+    <a class="manual-link auto-capture-link" href="${esc(autoCaptureUrl(v, iso))}">Try this date again${esc(dateText)} ↗</a>
+    <a href="#captureTools" onclick="document.getElementById('captureTools').open=true">Browser setup ↓</a>
     </div></div>`;
 }
 
@@ -2234,7 +2253,7 @@ function handleCaptureReturn() {
   try {
     envelope = JSON.parse(resultRaw || errorRaw);
   } catch (e) {
-    captureBatchStatus.textContent = "Safari returned capture data that Court Search could not read.";
+    captureBatchStatus.textContent = "The capture helper returned data that Court Search could not read.";
     captureBatchStatus.classList.add("err");
     return true;
   }
@@ -2243,7 +2262,7 @@ function handleCaptureReturn() {
   const validToken = envelope?.token === CAPTURE_SESSION_TOKEN ||
     (batch && envelope?.token === batch.token);
   if (!validToken) {
-    captureBatchStatus.textContent = "Safari returned an expired capture. Please start the capture again.";
+    captureBatchStatus.textContent = "The capture helper returned an expired capture. Please start the capture again.";
     captureBatchStatus.classList.add("err");
     return true;
   }
@@ -2281,7 +2300,7 @@ function handleCaptureReturn() {
       runAvailabilityWithoutRecapture();
     }
   } catch (e) {
-    const message = e && e.message ? e.message : "Safari returned an invalid capture.";
+    const message = e && e.message ? e.message : "The capture helper returned an invalid capture.";
     if (batch && batch.status === "running") continueCaptureBatch(batch, message);
     else {
       captureBatchStatus.textContent = message;
@@ -2373,7 +2392,7 @@ window.addEventListener("message", event => {
     captureBatchStatus.textContent = `Captured ${capture.count} visible times for ${capture.venue} on ${dayLabel(capture.iso)}. Refreshing results…`;
     runAvailabilityWithoutRecapture();
   } catch (e) {
-    captureBatchStatus.textContent = e && e.message ? e.message : "Safari returned an invalid capture.";
+    captureBatchStatus.textContent = e && e.message ? e.message : "The capture helper returned an invalid capture.";
     captureBatchStatus.classList.add("err");
   }
 });
