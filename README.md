@@ -12,7 +12,11 @@ you actually play in.
 - Filter by slot length (30 / 60 / 90 / 120 min) and a from–to window
 - Every listed time deep-links straight to that court's booking page
 - Weather per day, so you can skip the wet ones
-- Venue address, phone, email and a maps link on every card
+- Venue address, phone, email, rates and a maps link on every card
+
+Rates link to the venue's official pricing or booking page. Published hourly
+prices are shown where available; venues that calculate the fee after a court,
+date and time are selected are labelled **Live price shown during booking**.
 
 ## Venues
 
@@ -22,7 +26,7 @@ Eight of the fourteen are automatic. Two groups, two data sources:
 |---|---|---|
 | Allan Small, Tyron, Roseville, Loyal Henry, Elizabeth | Ku-ring-gai Council (Bookable) | Automatic |
 | Pennant Hills, Beecroft, Cowells Lane | tennisbcs.com.au | Automatic |
-| Marsfield, GPA, Ryde, Artarmon, Vince Barclay, Midson | tennisvenues.com.au | Safari-assisted or manual capture — see below |
+| Marsfield, GPA, Ryde, Artarmon, Vince Barclay, Midson | tennisvenues.com.au | Automatic Safari-assisted capture — see below |
 
 The Ku-ring-gai courts include unlit ones, where the council opens at sunrise
 and closes at sunset. Those sunrise/sunset times are computed per date (NOAA
@@ -35,10 +39,10 @@ tennisvenues.com.au, which does not permit other sites to read its
 availability — its `robots.txt` disallows the data endpoint and an AWS WAF
 challenge enforces it. **This app does not try to get around that.**
 
-They still appear in the list with their address, phone, email and a maps
-link. The app can also import times from an official page opened in your own
-browser. The Safari userscript and manual bookmarklet read only the visible
-booking links; neither copies cookies nor makes hidden requests.
+They still appear in the list with their address, phone, email, rates and a
+maps link. The Safari userscript reads only the visible booking links on the
+official page opened in your own browser; it does not copy cookies or make
+hidden requests.
 
 ## Use it
 
